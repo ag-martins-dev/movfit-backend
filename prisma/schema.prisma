@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                  String   @id @default(uuid())
+  name                String
+  email               String   @unique
+  age                 Int
+  passwordHash        String   @map("password_hash")
+  weightInGrams       Int?     @map("weight_in_grams")
+  heightInCentimeters Int?     @map("height_in_centimeters")
+  goalWeightInGrams   Int?     @map("goal_weight_in_grams")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  waterIngestion WaterIngestion?
+  weightHistory  WeightHistory[]
+  workoutConfig  WorkoutConfig?
+  diets          Diet[]
+
+  @@map("users")
+}
+
+model Diet {
+  id              String   @id @default(uuid())
+  proteinsInGrams Int      @map("proteins_in_grams")
+  carbsInGrams    Int      @map("carbs_in_grams")
+  fatsInGrams     Int      @map("fats_in_grams")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  goal   DietGoal
+  userId String   @map("user_id")
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("diets")
+}
+
+enum DietGoal {
+  GAIN_MASS
+  DEFINE
+  LOSE_WEIGHT
+  MAINTAIN_WEIGHT
+}
+
+model WeightHistory {
+  id            String   @id @default(uuid())
+  weightInGrams Int      @map("weight_in_grams")
+  createdAt     DateTime @default(now()) @map("created_at")
+  userId        String   @map("user_id")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("weights_history")
+}
+
+enum WorkoutGoal {
+  GAIN_MASS
+  DEFINITION
+  LOSE_WEIGHT
+}
+
+model WorkoutConfig {
+  id                     String   @id @default(uuid())
+  freeWeekDays           Int      @map("free_week_days")
+  freeTimeByDayInSeconds Int      @map("free_time_by_day_in_seconds")
+  focusMuscles           String[] @map("focus_muscles")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  goal   WorkoutGoal @map("workout_goal")
+  userId String      @unique @map("user_id")
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("workouts_config")
+}
+
+model WaterIngestion {
+  id                         String   @id @default(uuid())
+  idealIngestionInMililiters Int      @map("ideal_ingestion_in_mililiters")
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("water_ingestions")
+}
