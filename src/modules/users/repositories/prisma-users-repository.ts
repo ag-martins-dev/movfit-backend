@@ -4,6 +4,7 @@ import { CreateUserInputDto } from 'src/modules/users/dtos/create-user.dto';
 import { UsersRepository } from 'src/modules/users/repositories/users-repository';
 
 import { PrismaService } from 'src/infra/database/prisma/prisma.service';
+import { UpdateUserMetricsInputDto } from '../dtos/update-user-metrics.dto';
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
@@ -38,13 +39,16 @@ export class PrismaUsersRepository implements UsersRepository {
     });
   }
 
-  updateBodyMetrics(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  getAll(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  delete(): Promise<void> {
-    throw new Error('Method not implemented.');
+  async updateMetrics(userId: string, data: UpdateUserMetricsInputDto) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        goal: data.goal,
+        biologicalSex: data.biologicalSex,
+        heightInCentimeters: data.heightInCentimeters,
+        weightInGrams: data.weightInGrams,
+        goalWeightInGrams: data.goalWeightInGrams,
+      },
+    });
   }
 }
