@@ -21,6 +21,8 @@ export class GetMeUseCase {
       name: user.name,
       email: user.email,
       age: user.age,
+      goal: user.goal,
+      biologicalSex: user.biologicalSex,
       weightInGrams: user.weightInGrams,
       heightInCentimeters: user.heightInCentimeters,
       goalWeightInGrams: user.goalWeightInGrams,

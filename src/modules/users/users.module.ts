@@ -8,12 +8,14 @@ import { HashModule } from '../hash/hash.module';
 import { PrismaUsersRepository } from './repositories/prisma-users-repository';
 import { GetMeUseCase } from './use-cases/get-me.use-case';
 import { JwtAuthModule } from '../auth/jwt-auth.module';
+import { UpdateUserMetricsUseCase } from './use-cases/update-user-metrics.use-case';
 
 @Module({
   imports: [HashModule, JwtAuthModule],
   exports: [UsersRepository, CreateUserUseCase],
   controllers: [UsersController],
   providers: [
+    UpdateUserMetricsUseCase,
     CreateUserUseCase,
     GetMeUseCase,
     PrismaService,
