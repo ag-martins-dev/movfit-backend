@@ -12,7 +12,6 @@ export class LoginUseCase {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly hashRepository: HashRepository,
-
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly jwtService: JwtService,
@@ -55,11 +54,7 @@ export class LoginUseCase {
     );
 
     return {
-      id: user.id,
-      age: user.age,
-      name: user.name,
-      email: user.email,
-      token,
+      accessToken: token,
     };
   }
 }

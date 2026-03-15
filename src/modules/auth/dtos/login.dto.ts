@@ -10,9 +10,5 @@ export class LoginInputDto {
 }
 
 export class LoginOutputDto {
-  id: string;
-  age: number;
-  name: string;
-  email: string;
-  token: string;
+  accessToken: string;
 }

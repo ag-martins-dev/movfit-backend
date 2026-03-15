@@ -5,7 +5,6 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UsersRepository } from 'src/modules/users/repositories/users-repository';
 import jwtConfig from '../config/jwt.config';
 import type { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -14,10 +13,8 @@ import { TokenPayloadDto } from '../dtos/token-payload.dto';
 import { PAYLOAD_KEY } from '../constants/auth.constant';
 
 @Injectable()
-export class AuthTokenGuard implements CanActivate {
+export class JwtAuthGuard implements CanActivate {
   constructor(
-    private readonly usersRepository: UsersRepository,
-
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly jwtService: JwtService,
@@ -27,8 +24,7 @@ export class AuthTokenGuard implements CanActivate {
     const request = ctx.switchToHttp().getRequest<FastifyRequest>();
     const token = this.extractTokenFromHeader(request);
 
-    const isUserNotAuthenticated = !token || token === null;
-    if (isUserNotAuthenticated) {
+    if (!token || token === null) {
       throw new UnauthorizedException({
         message: 'Unauthorized.',
         code: 'UNAUTHORIZED_ERROR',
@@ -40,17 +36,7 @@ export class AuthTokenGuard implements CanActivate {
       this.jwtConfiguration,
     );
 
-    const user = await this.usersRepository.getById(payload.sub);
-
-    if (!user) {
-      throw new UnauthorizedException({
-        message: 'Unauthorized.',
-        code: 'UNAUTHORIZED_ERROR',
-      });
-    } else {
-      request[PAYLOAD_KEY] = payload;
-    }
-
+    request[PAYLOAD_KEY] = payload;
     return true;
   }
 

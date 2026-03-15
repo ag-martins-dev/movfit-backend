@@ -8,7 +8,6 @@ import {
 
 import { LoginInputDto } from '../dtos/login.dto';
 import { LoginUseCase } from '../use-cases/login.use-case';
-import { AuthTokenGuard } from '../guards/auth.guard';
 import { CreateUserInputDto } from 'src/modules/users/dtos/create-user.dto';
 import { CreateUserUseCase } from 'src/modules/users/use-cases/create-user.use-case';
 
