@@ -1,13 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersRepository } from '../repositories/users-repository';
 import { TokenPayloadDto } from 'src/modules/auth/dtos/token-payload.dto';
-import { GetMeOutoutDto } from '../dtos/get-me.dto';
+import { GetMeDto } from '../dtos/get-me.dto';
 
 @Injectable()
 export class GetMeUseCase {
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  async execute(payload: TokenPayloadDto): Promise<GetMeOutoutDto> {
+  async execute(payload: TokenPayloadDto): Promise<GetMeDto> {
     const user = await this.usersRepository.getById(payload.sub);
 
     if (!user) {

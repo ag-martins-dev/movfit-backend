@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UsersRepository } from '../repositories/users-repository';
 import { UpdateUserMetricsInputDto } from '../dtos/update-user-metrics.dto';
 
@@ -10,10 +10,7 @@ export class UpdateUserMetricsUseCase {
     const user = await this.usersRepository.getById(userId);
 
     if (!user) {
-      throw new UnauthorizedException({
-        message: 'Unauthorized.',
-        code: 'UNAUTHORIZED_ERROR',
-      });
+      throw new HttpException('Unauthorized.', HttpStatus.UNAUTHORIZED);
     }
 
     return await this.usersRepository.updateMetrics(user.id, data);
