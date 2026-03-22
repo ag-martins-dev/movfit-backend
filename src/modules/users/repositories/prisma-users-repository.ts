@@ -72,4 +72,17 @@ export class PrismaUsersRepository implements UsersRepository {
       },
     });
   }
+
+  async getMetrics(userId: string): Promise<GetUserMetricsDto | null> {
+    return await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        birthDate: true,
+        biologicalSex: true,
+        goal: true,
+        heightInCentimeters: true,
+        weightInGrams: true,
+      },
+    });
+  }
 }
