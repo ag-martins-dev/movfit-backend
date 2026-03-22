@@ -5,11 +5,10 @@ import { PrismaService } from 'src/infra/database/prisma/prisma.service';
 import { GetWaterIngestionUseCase } from './use-cases/get-water-ingestion.use-case';
 import { UsersModule } from '../users/users.module';
 import { WaterIngestionController } from './controllers/water-ingestion.controller';
-import { JwtAuthModule } from '../auth/jwt-auth.module';
 import { UpdateWaterIngestionUseCase } from './use-cases/update-water-ingestion.use-case';
 
 @Module({
-  imports: [UsersModule, JwtAuthModule],
+  imports: [UsersModule],
   controllers: [WaterIngestionController],
   exports: [WaterIngestionRepository],
   providers: [

@@ -1,6 +1,6 @@
 import { BiologicalSex, UserGoal } from 'generated/prisma/enums';
 
-export class GetMeOutoutDto {
+export class GetMeDto {
   name: string;
   email: string;
   birthDate: Date;
