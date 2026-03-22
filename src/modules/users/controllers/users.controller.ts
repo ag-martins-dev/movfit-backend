@@ -1,15 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpStatus,
-  Patch,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Patch, Req } from '@nestjs/common';
 
-import { CreateUserUseCase } from '../use-cases/create-user.use-case';
-import { JwtAuthGuard } from 'src/modules/auth/guards/auth.guard';
 import { GetMeUseCase } from '../use-cases/get-me.use-case';
 import { TokenPayloadDto } from 'src/modules/auth/dtos/token-payload.dto';
 import type { FastifyRequest } from 'fastify';
@@ -17,6 +7,7 @@ import { PAYLOAD_KEY } from 'src/modules/auth/constants/auth.constant';
 import { UpdateUserMetricsUseCase } from '../use-cases/update-user-metrics.use-case';
 import { UpdateUserMetricsInputDto } from '../dtos/update-user-metrics.dto';
 import { ApiResponse } from '@nestjs/swagger';
+import { BiologicalSex, UserGoal } from 'generated/prisma/enums';
 
 @Controller({
   path: '/users',
@@ -24,7 +15,6 @@ import { ApiResponse } from '@nestjs/swagger';
 })
 export class UsersController {
   constructor(
-    private readonly createUserUseCase: CreateUserUseCase,
     private readonly updateUserMetricsUseCase: UpdateUserMetricsUseCase,
     private readonly getMeUseCase: GetMeUseCase,
   ) {}
@@ -36,18 +26,20 @@ export class UsersController {
       type: 'object',
       properties: {
         name: { type: 'string' },
-        email: { type: 'string' },
-        birthDate: { type: 'string' },
-        goal: { type: 'string' },
-        biologicalSex: { type: 'string' },
+        email: { type: 'string', format: 'email', uniqueItems: true },
+        birthDate: { type: 'string', format: 'date' },
+        goal: {
+          type: 'string',
+          enum: [UserGoal],
+        },
+        biologicalSex: { type: 'string', enum: [BiologicalSex] },
         weightInGrams: { type: 'number' },
-        heightInCentimeters: { type: 'number' },
+        heightInCentimeters: { type: 'number', maximum: 240 },
         goalWeightInGrams: { type: 'number' },
       },
     },
   })
   @Get('/me')
-  @UseGuards(JwtAuthGuard)
   getMe(@Req() req: FastifyRequest) {
     const payload: TokenPayloadDto = req[PAYLOAD_KEY];
     return this.getMeUseCase.execute(payload);
@@ -59,16 +51,18 @@ export class UsersController {
     schema: {
       type: 'object',
       properties: {
-        goal: { type: 'string' },
-        biologicalSex: { type: 'string' },
+        goal: {
+          type: 'string',
+          enum: [UserGoal],
+        },
+        biologicalSex: { type: 'string', enum: [BiologicalSex] },
         weightInGrams: { type: 'number' },
-        heightInCentimeters: { type: 'number' },
+        heightInCentimeters: { type: 'number', maximum: 240 },
         goalWeightInGrams: { type: 'number' },
       },
     },
   })
   @Patch('/metrics')
-  @UseGuards(JwtAuthGuard)
   updateUserMetrics(
     @Req() req: FastifyRequest,
     @Body() dto: UpdateUserMetricsInputDto,
