@@ -26,20 +26,36 @@ model User {
   email               String         @unique
   goal                UserGoal?
   biologicalSex       BiologicalSex?
-  age                 Int
+  birthDate           DateTime       @map("birth_date")
   passwordHash        String         @map("password_hash")
   weightInGrams       Int?           @map("weight_in_grams")
   heightInCentimeters Int?           @map("height_in_centimeters")
   goalWeightInGrams   Int?           @map("goal_weight_in_grams")
-  createdAt           DateTime       @default(now()) @map("created_at")
-  updatedAt           DateTime       @updatedAt @map("updated_at")
 
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  dailyNutrition DailyNutrition[]
   waterIngestion WaterIngestion?
   weightHistory  WeightHistory[]
+  activeDiet     Diet?
   workoutConfig  WorkoutConfig?
-  diets          Diet[]
 
   @@map("users")
+}
+
+model DailyNutrition {
+  id              String   @id @default(uuid())
+  day            DateTime
+  proteinsInGrams Int      @default(0) @map("proteins_in_grams")
+  carbsInGrams    Int      @default(0) @map("carbs_in_grams")
+  fatsInGrams     Int      @default(0) @map("fats_in_grams")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+  @@map("daily_nutritions")
 }
 
 model Diet {
@@ -52,10 +68,42 @@ model Diet {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   goal   UserGoal
-  userId String   @map("user_id")
-  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meals  DietMeal[]
+  userId String     @unique @map("user_id")
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("diets")
+}
+
+model DietMeal {
+  id              String   @id @default(uuid())
+  hour            String
+  totalCalories   Int      @map("total_calories")
+  carbsInGrams    Int      @map("carbs_in_grams")
+  proteinsInGrams Int      @map("proteins_in_grams")
+  fatsInGrams     Int      @map("fats_in_grams")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  foodsConsumed DietFood[]
+  dietId        String     @map("diet_id")
+  diet          Diet       @relation(fields: [dietId], references: [id], onDelete: Cascade)
+
+  @@map("diet_meals")
+}
+
+model DietFood {
+  id                   String  @id @default(uuid())
+  name                 String
+  quantity             Int
+  weightPerUnitInGrams Int     @map("weight_per_unit_in_grams")
+  totalCalories        Int     @map("total_calories")
+  imageUrl             String? @map("image_url")
+
+  dietMealId String   @map("diet_meal_id")
+  dietMeal   DietMeal @relation(fields: [dietMealId], references: [id], onDelete: Cascade)
+
+  @@map("diet_consumed_foods")
 }
 
 model WeightHistory {
@@ -90,10 +138,11 @@ model WorkoutConfig {
 }
 
 model WaterIngestion {
-  id                         String   @id @default(uuid())
-  idealIngestionInMililiters Int      @map("ideal_ingestion_in_mililiters")
-  createdAt                  DateTime @default(now()) @map("created_at")
-  updatedAt                  DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  goalInMl     Int?     @map("goal_in_ml")
+  consumedInMl Int      @default(0) @map("consumed_in_ml")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   userId String @unique @map("user_id")
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
