@@ -41,7 +41,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async updateMetrics(userId: string, data: UpdateUserMetricsInputDto) {
-    await this.prisma.user.update({
+    return await this.prisma.user.update({
       where: { id: userId },
       data: {
         goal: data.goal,
@@ -49,6 +49,13 @@ export class PrismaUsersRepository implements UsersRepository {
         heightInCentimeters: data.heightInCentimeters,
         weightInGrams: data.weightInGrams,
         goalWeightInGrams: data.goalWeightInGrams,
+      },
+      select: {
+        goal: true,
+        biologicalSex: true,
+        heightInCentimeters: true,
+        weightInGrams: true,
+        goalWeightInGrams: true,
       },
     });
   }
