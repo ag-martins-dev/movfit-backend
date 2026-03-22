@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { JwtAuthModule } from '../auth/jwt-auth.module';
 import { DailyNutritionController } from './controllers/daily-nutrition.controller';
 import { PrismaService } from 'src/infra/database/prisma/prisma.service';
 import { DailyNutritionRepository } from './repositories/daily-nutrition.repository';
@@ -9,7 +8,7 @@ import { WaterIngestionModule } from '../water-ingestion/water-ingestion.module'
 import { UpdateDailyNutritionUseCase } from './use-cases/update-daily-nutrition.use-case';
 
 @Module({
-  imports: [JwtAuthModule, WaterIngestionModule],
+  imports: [WaterIngestionModule],
   controllers: [DailyNutritionController],
   exports: [DailyNutritionRepository],
   providers: [

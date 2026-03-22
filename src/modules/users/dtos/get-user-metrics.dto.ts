@@ -1,7 +1,7 @@
 import { BiologicalSex, UserGoal } from 'generated/prisma/enums';
 import { UserGetPayload } from 'generated/prisma/models';
 
-type GetMetricsUserPayload = UserGetPayload<{
+type GetMetricsPayloadData = UserGetPayload<{
   select: {
     biologicalSex: true;
     birthDate: true;
@@ -11,7 +11,7 @@ type GetMetricsUserPayload = UserGetPayload<{
   };
 }>;
 
-export class GetUserMetricsDto implements GetMetricsUserPayload {
+export class GetUserMetricsDto implements GetMetricsPayloadData {
   biologicalSex: BiologicalSex | null;
   birthDate: Date;
   heightInCentimeters: number | null;

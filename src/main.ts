@@ -29,6 +29,7 @@ async function bootstrap() {
     .setTitle('Movfit API')
     .setDescription('API - Movfit App')
     .setVersion('3.0.0')
+    .addBearerAuth()
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);

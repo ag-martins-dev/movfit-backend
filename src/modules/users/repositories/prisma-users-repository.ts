@@ -1,23 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { User } from 'generated/prisma/client';
-import { CreateUserInputDto } from 'src/modules/users/dtos/create-user.dto';
-import { UsersRepository } from 'src/modules/users/repositories/users-repository';
+import {
+  CreateUserData,
+  CreateUserResultData,
+  UpdateMetricsData,
+  UpdateMetricsResultData,
+  UsersRepository,
+} from 'src/modules/users/repositories/users-repository';
 
 import { PrismaService } from 'src/infra/database/prisma/prisma.service';
-import { UpdateUserMetricsInputDto } from '../dtos/update-user-metrics.dto';
-import { GetUserMetricsDto } from '../dtos/get-metrics.dto';
+import { GetUserMetricsDto } from '../dtos/get-user-metrics.dto';
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create({ name, birthDate, email, password }: CreateUserInputDto) {
+  async create(data: CreateUserData): Promise<CreateUserResultData> {
     return await this.prisma.user.create({
       data: {
-        name,
-        email,
-        birthDate,
-        passwordHash: password,
+        name: data.name,
+        email: data.email,
+        birthDate: data.birthDate,
+        passwordHash: data.password,
       },
       omit: {
         passwordHash: true,
@@ -40,7 +44,10 @@ export class PrismaUsersRepository implements UsersRepository {
     });
   }
 
-  async updateMetrics(userId: string, data: UpdateUserMetricsInputDto) {
+  async updateMetrics(
+    userId: string,
+    data: UpdateMetricsData,
+  ): Promise<UpdateMetricsResultData> {
     return await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -56,19 +63,6 @@ export class PrismaUsersRepository implements UsersRepository {
         heightInCentimeters: true,
         weightInGrams: true,
         goalWeightInGrams: true,
-      },
-    });
-  }
-
-  async getMetrics(userId: string): Promise<GetUserMetricsDto | null> {
-    return await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        birthDate: true,
-        biologicalSex: true,
-        goal: true,
-        heightInCentimeters: true,
-        weightInGrams: true,
       },
     });
   }
