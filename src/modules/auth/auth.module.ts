@@ -7,6 +7,7 @@ import { LoginUseCase } from './use-cases/login.use-case';
 import { AuthController } from './controllers/auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { SignupUseCase } from './use-cases/signup.use-case';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { SignupUseCase } from './use-cases/signup.use-case';
       },
     }),
   ],
-  providers: [LoginUseCase, SignupUseCase],
+  providers: [LoginUseCase, SignupUseCase, JwtStrategy],
   exports: [LoginUseCase, SignupUseCase],
   controllers: [AuthController],
 })
