@@ -34,16 +34,14 @@ export class UsersController {
     schema: {
       type: 'object',
       properties: {
+        id: { type: 'string', format: 'uuid', uniqueItems: true },
         name: { type: 'string' },
         email: { type: 'string', format: 'email', uniqueItems: true },
         birthDate: { type: 'string', format: 'date' },
-        goal: {
-          type: 'string',
-          enum: [UserGoal],
-        },
+        goal: { type: 'string', enum: [UserGoal] },
         biologicalSex: { type: 'string', enum: [BiologicalSex] },
         weightInGrams: { type: 'number' },
-        heightInCentimeters: { type: 'number', maximum: 240 },
+        heightInCentimeters: { type: 'number' },
         goalWeightInGrams: { type: 'number' },
       },
     },
@@ -60,13 +58,10 @@ export class UsersController {
     schema: {
       type: 'object',
       properties: {
-        goal: {
-          type: 'string',
-          enum: [UserGoal],
-        },
+        goal: { type: 'string', enum: [UserGoal] },
         biologicalSex: { type: 'string', enum: [BiologicalSex] },
         weightInGrams: { type: 'number' },
-        heightInCentimeters: { type: 'number', maximum: 240 },
+        heightInCentimeters: { type: 'number' },
         goalWeightInGrams: { type: 'number' },
       },
     },
