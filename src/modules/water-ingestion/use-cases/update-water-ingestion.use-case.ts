@@ -1,28 +1,17 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { getUserDailyIngestion } from 'src/modules/water-ingestion/helpers/get-user-daily-ingestion.helper';
-import { UsersRepository } from 'src/modules/users/repositories/users-repository';
 import { WaterIngestionRepository } from '../repositories/water-ingestion.repository';
+import { RequestContextService } from 'src/common/services/request-context.service';
 
 @Injectable()
 export class UpdateWaterIngestionUseCase {
   constructor(
-    private readonly usersRepository: UsersRepository,
     private readonly repository: WaterIngestionRepository,
+    private readonly requestContext: RequestContextService,
   ) {}
 
-  async execute(userId: string) {
-    const user = await this.usersRepository.getById(userId);
-
-    if (!user) {
-      throw new UnauthorizedException({
-        message: 'Unauthorized.',
-        code: 'UNAUTHORIZED_ERROR',
-      });
-    }
+  async execute() {
+    const user = this.requestContext.getUser;
 
     if (
       user.biologicalSex === null ||
@@ -43,7 +32,7 @@ export class UpdateWaterIngestionUseCase {
     });
 
     return await this.repository.upsertWaterIngestion(
-      userId,
+      user.id,
       dailyIngestionInMl,
     );
   }

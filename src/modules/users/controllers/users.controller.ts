@@ -13,17 +13,18 @@ import { UpdateUserMetricsUseCase } from '../use-cases/update-user-metrics.use-c
 import { UpdateUserMetricsInputDto } from '../dtos/update-user-metrics.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { BiologicalSex, UserGoal } from 'generated/prisma/enums';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { AuthenticatedUser } from 'src/modules/auth/decorators/authenticated-user.decorator';
 import type { User } from 'generated/prisma/client';
-import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(JwtAuthGuard)
 @Controller({
   path: '/users',
   version: '4',
 })
 export class UsersController {
   constructor(
-    private readonly updateUserMetricsUseCase: UpdateUserMetricsUseCase,
+    private readonly updateMetricsUseCase: UpdateUserMetricsUseCase,
     private readonly getMeUseCase: GetMeUseCase,
   ) {}
 
@@ -48,7 +49,6 @@ export class UsersController {
     },
   })
   @Get('/me')
-  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   getMe(@AuthenticatedUser() user: User) {
     return this.getMeUseCase.execute(user);
@@ -72,12 +72,8 @@ export class UsersController {
     },
   })
   @Patch('/metrics')
-  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
-  updateUserMetrics(
-    @AuthenticatedUser() user: User,
-    @Body() dto: UpdateUserMetricsInputDto,
-  ) {
-    return this.updateUserMetricsUseCase.execute(user.id, dto);
+  updateUserMetrics(@Body() dto: UpdateUserMetricsInputDto) {
+    return this.updateMetricsUseCase.execute(dto);
   }
 }

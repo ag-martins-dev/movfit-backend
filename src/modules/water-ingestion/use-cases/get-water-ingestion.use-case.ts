@@ -1,34 +1,22 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { WaterIngestionRepository } from '../repositories/water-ingestion.repository';
 import { getUserDailyIngestion } from 'src/modules/water-ingestion/helpers/get-user-daily-ingestion.helper';
-import { UsersRepository } from 'src/modules/users/repositories/users-repository';
 import { GetWaterIngestionDto } from '../dtos/get-ingestion.dto';
+import { RequestContextService } from 'src/common/services/request-context.service';
 
 @Injectable()
 export class GetWaterIngestionUseCase {
   constructor(
-    private readonly usersRepository: UsersRepository,
     private readonly repository: WaterIngestionRepository,
+    private readonly requestContext: RequestContextService,
   ) {}
 
-  async execute(userId: string): Promise<GetWaterIngestionDto> {
-    const waterIngestion = await this.repository.getWaterIngestion(userId);
+  async execute(): Promise<GetWaterIngestionDto> {
+    const user = this.requestContext.getUser;
+    const waterIngestion = await this.repository.getWaterIngestion(user.id);
 
     if (waterIngestion) {
       return waterIngestion;
-    }
-
-    const user = await this.usersRepository.getMetrics(userId);
-
-    if (!user) {
-      throw new UnauthorizedException({
-        message: 'Unauthorized.',
-        code: 'UNAUTHORIZED_ERROR',
-      });
     }
 
     if (
@@ -50,7 +38,7 @@ export class GetWaterIngestionUseCase {
     });
 
     return await this.repository.upsertWaterIngestion(
-      userId,
+      user.id,
       dailyIngestionInMl,
     );
   }

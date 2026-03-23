@@ -9,10 +9,9 @@ import {
 import { GetWaterIngestionUseCase } from '../use-cases/get-water-ingestion.use-case';
 import { UpdateWaterIngestionUseCase } from '../use-cases/update-water-ingestion.use-case';
 import { ApiResponse } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
-import { AuthenticatedUser } from 'src/modules/auth/decorators/authenticated-user.decorator';
-import type { User } from 'generated/prisma/client';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller({
   path: '/water-ingestion',
   version: '4',
@@ -35,10 +34,9 @@ export class WaterIngestionController {
     },
   })
   @Get()
-  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
-  getWaterIngestion(@AuthenticatedUser() user: User) {
-    return this.getWaterIngestionUseCase.execute(user.id);
+  getWaterIngestion() {
+    return this.getWaterIngestionUseCase.execute();
   }
 
   @ApiResponse({
@@ -53,9 +51,8 @@ export class WaterIngestionController {
     },
   })
   @Patch()
-  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.CREATED)
-  updateWaterIngestion(@AuthenticatedUser() user: User) {
-    return this.updateWaterIngestionUseCase.execute(user.id);
+  updateWaterIngestion() {
+    return this.updateWaterIngestionUseCase.execute();
   }
 }
