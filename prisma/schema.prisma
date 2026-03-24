@@ -13,7 +13,7 @@ enum BiologicalSex {
   FEMALE
 }
 
-enum UserGoal {
+enum Goal {
   GAIN_MASS
   DEFINE
   LOSE_WEIGHT
@@ -21,36 +21,56 @@ enum UserGoal {
 }
 
 model User {
-  id                  String         @id @default(uuid())
-  name                String
-  email               String         @unique
-  goal                UserGoal?
-  biologicalSex       BiologicalSex?
-  birthDate           DateTime       @map("birth_date")
-  passwordHash        String         @map("password_hash")
-  weightInGrams       Int?           @map("weight_in_grams")
-  heightInCentimeters Int?           @map("height_in_centimeters")
-  goalWeightInGrams   Int?           @map("goal_weight_in_grams")
+  id           String @id @default(uuid())
+  name         String
+  email        String @unique
+  passwordHash String @map("password_hash")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  isOnboardingCompleted Boolean @default(false) @map("is_onboarding_completed")
 
-  weightHistory         WeightHistory[]
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  weightHistory           WeightHistory[]
   waterConsumptionHistory WaterConsumptionHistory[]
-  dailyNutrition        DailyNutrition[]
-  waterConsumption        WaterConsumption?
-  activeDiet            Diet?
-  workoutConfig         WorkoutConfig?
+  dailyNutrition          DailyNutrition[]
+  workoutPlans            WorkoutPlan[]
+
+  workoutConfig    WorkoutConfig?
+  waterConsumption WaterConsumption?
+  activeDiet       Diet?
+  profile          Profile?
 
   @@map("users")
 }
 
+model Profile {
+  id String @id @default(uuid())
+
+  goal                Goal
+  biologicalSex       BiologicalSex @map("biological_sex")
+  birthDate           DateTime      @map("birth_date") @db.Date()
+  heightInCentimeters Int           @map("height_in_centimeters")
+
+  weightInGrams       Int @map("weight_in_grams")
+  targetWeightInGrams Int @map("target_weight_in_grams")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
 model DailyNutrition {
-  id              String   @id @default(uuid())
-  day             DateTime
-  proteinsInGrams Int      @default(0) @map("proteins_in_grams")
-  carbsInGrams    Int      @default(0) @map("carbs_in_grams")
-  fatsInGrams     Int      @default(0) @map("fats_in_grams")
+  id  String   @id @default(uuid())
+  day DateTime @db.Date
+
+  proteinsInGrams Int @default(0) @map("proteins_in_grams")
+  carbsInGrams    Int @default(0) @map("carbs_in_grams")
+  fatsInGrams     Int @default(0) @map("fats_in_grams")
 
   userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -60,15 +80,17 @@ model DailyNutrition {
 }
 
 model Diet {
-  id              String   @id @default(uuid())
-  proteinsInGrams Int      @map("proteins_in_grams")
-  carbsInGrams    Int      @map("carbs_in_grams")
-  fatsInGrams     Int      @map("fats_in_grams")
-  isActive        Boolean  @default(true) @map("is_active")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id       String  @id @default(uuid())
+  isActive Boolean @default(true) @map("is_active")
 
-  goal   UserGoal
+  proteinsInGrams Int @map("proteins_in_grams")
+  carbsInGrams    Int @map("carbs_in_grams")
+  fatsInGrams     Int @map("fats_in_grams")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  goal   Goal
   meals  DietMeal[]
   userId String     @unique @map("user_id")
   user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -77,18 +99,20 @@ model Diet {
 }
 
 model DietMeal {
-  id              String   @id @default(uuid())
-  hour            String
+  id            String @id @default(uuid())
+  timeInMinutes Int    @map("time_in_minutes")
+
   totalCalories   Int      @map("total_calories")
   carbsInGrams    Int      @map("carbs_in_grams")
   proteinsInGrams Int      @map("proteins_in_grams")
   fatsInGrams     Int      @map("fats_in_grams")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  foodsConsumed DietFood[]
-  dietId        String     @map("diet_id")
-  diet          Diet       @relation(fields: [dietId], references: [id], onDelete: Cascade)
+  consumedFoods DietFood[]
+
+  dietId String @map("diet_id")
+  diet   Diet   @relation(fields: [dietId], references: [id], onDelete: Cascade)
 
   @@map("diet_meals")
 }
@@ -99,7 +123,7 @@ model DietFood {
   quantity             Int
   weightPerUnitInGrams Int     @map("weight_per_unit_in_grams")
   totalCalories        Int     @map("total_calories")
-  imageUrl             String? @map("image_url")
+  coverImageUrl        String? @map("cover_image_url")
 
   dietMealId String   @map("diet_meal_id")
   dietMeal   DietMeal @relation(fields: [dietMealId], references: [id], onDelete: Cascade)
@@ -110,45 +134,153 @@ model DietFood {
 model WeightHistory {
   id            String   @id @default(uuid())
   weightInGrams Int      @map("weight_in_grams")
-  createdAt     DateTime @default(now()) @map("created_at")
-  userId        String   @map("user_id")
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
-  @@map("weights_history")
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("weight_histories")
 }
 
-enum WorkoutGoal {
-  GAIN_MASS
-  DEFINITION
-  LOSE_WEIGHT
+enum FocusMuscle {
+  CHEST
+  BACK
+  SHOULDERS
+  BICEPS
+  TRICEPS
+  FOREARMS
+  CORE
+  ABS
+  OBLIQUES
+  GLUTES
+  QUADRICEPS
+  HAMSTRINGS
+  CALVES
+  ADDUCTORS
+  ABDUCTORS
+  TRAPS
+  LATS
+  LOWER_BACK
+  NECK
+  FULL_BODY
 }
 
 model WorkoutConfig {
-  id                     String   @id @default(uuid())
-  freeWeekDays           Int      @map("free_week_days")
-  freeTimeByDayInSeconds Int      @map("free_time_by_day_in_seconds")
-  focusMuscles           String[] @map("focus_muscles")
-  createdAt              DateTime @default(now()) @map("created_at")
-  updatedAt              DateTime @updatedAt @map("updated_at")
+  id                     String        @id @default(uuid())
+  freeDaysPerWeek        Int           @map("free_days_per_week")
+  freeTimeByDayInSeconds Int           @map("free_time_by_day_in_seconds")
+  focusMuscles           FocusMuscle[] @map("focus_muscles")
 
-  goal   WorkoutGoal @map("workout_goal")
-  userId String      @unique @map("user_id")
-  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("workouts_config")
-}
-
-model WaterConsumption {
-  id           String   @id @default(uuid())
-  goalInMl     Int      @default(2000) @map("goal_in_ml")
-  consumedInMl Int      @default(0) @map("consumed_in_ml")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   userId String @unique @map("user_id")
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("water_consumption")
+  @@map("workout_configs")
+}
+
+model WorkoutPlan {
+  id String @id @default(uuid())
+
+  name     String
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workoutDays WorkoutDay[]
+
+  @@map("workout_plans")
+}
+
+model WorkoutExercise {
+  id String @id @default(uuid())
+
+  name              String
+  order             Int
+  reps              Int
+  sets              Int
+  restTimeInSeconds Int      @map("rest_time_in_seconds")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  workoutDayId String     @map("workout_day_id")
+  workoutDay   WorkoutDay @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+
+  @@map("workout_exercises")
+}
+
+model WorkoutDay {
+  id                         String   @id @default(uuid())
+  name                       String
+  isRest                     Boolean  @default(false) @map("is_rest")
+  estimatedDurationInSeconds Int      @map("estimated_duration_in_seconds")
+  coverImageUrl              String   @map("cover_image_url")
+  createdAt                  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt                  DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  weekDay                    WeekDay  @map("week_day")
+
+  workoutPlanId String      @map("workout_plan_id")
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+
+  exercises WorkoutExercise[]
+  sessions  WorkoutSession[]
+
+  @@map("workout_days")
+}
+
+enum WeekDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model WorkoutSession {
+  id String @id @default(uuid())
+
+  startedAt   DateTime  @map("started_at") @db.Timestamptz()
+  completedAt DateTime? @map("completed_at") @db.Timestamptz()
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  workoutDayId String     @map("workout_day_id")
+  workoutDay   WorkoutDay @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+
+  @@map("workout_sessions")
+}
+
+model WaterConsumption {
+  id           String @id @default(uuid())
+  goalInMl     Int    @default(2000) @map("goal_in_ml")
+  consumedInMl Int    @default(0) @map("consumed_in_ml")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("water_consumptions")
+}
+
+model WaterConsumptionHistory {
+  id         String   @id @default(uuid())
+  amountInMl Int      @map("amount_in_ml")
+  date       DateTime @db.Date
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("water_consumption_histories")
 }
 
 model WaterConsumptionHistory {
