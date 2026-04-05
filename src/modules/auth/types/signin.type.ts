@@ -1,8 +1,8 @@
-export type SigninInput = {
+export type SigninRequest = {
   email: string
   password: string
 }
 
-export type SigninOutput = {
+export type SigninResponse = {
   accessToken: string
 }

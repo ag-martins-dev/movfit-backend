@@ -3,36 +3,30 @@ import { JwtService } from '@nestjs/jwt'
 import bcrypt from 'bcryptjs'
 import { UsersRepository } from 'src/modules/users/repositories/users-repository'
 import { Payload } from '../types/payload.type'
-import { SigninInput, SigninOutput } from '../types/signin.type'
+import { SigninRequest, SigninResponse } from '../types/signin.type'
 
 @Injectable()
 export class SigninUseCase {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    private readonly usersRepo: UsersRepository,
     private readonly jwtService: JwtService,
   ) {}
 
-  async execute(input: SigninInput): Promise<SigninOutput> {
-    const user = await this.usersRepository.findByEmailForAuth({
-      email: input.email,
-    })
+  async execute(input: SigninRequest): Promise<SigninResponse> {
+    const user = await this.usersRepo.getByEmailForAuth(input.email)
 
     if (!user) {
-      throw new BadRequestException('Invalid email or password.')
+      throw new BadRequestException('Invalid e-mail or password.')
     }
 
     const isPasswordMatch = await bcrypt.compare(input.password, user.passwordHash)
 
     if (!isPasswordMatch) {
-      throw new BadRequestException('Invalid email or password.')
+      throw new BadRequestException('Invalid e-mail or password.')
     }
 
-    const accessToken = await this.jwtService.signAsync<Payload>({
-      sub: user.id,
-    })
+    const accessToken = await this.jwtService.signAsync<Payload>({ sub: user.id })
 
-    return {
-      accessToken,
-    }
+    return { accessToken }
   }
 }

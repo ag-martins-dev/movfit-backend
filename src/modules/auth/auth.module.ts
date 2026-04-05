@@ -25,8 +25,8 @@ import { SignupUseCase } from './use-cases/signup.use-case'
       },
     }),
   ],
-  providers: [SigninUseCase, SignupUseCase, JwtStrategy],
-  exports: [SigninUseCase, SignupUseCase],
   controllers: [AuthController],
+  exports: [SigninUseCase, SignupUseCase],
+  providers: [SigninUseCase, SignupUseCase, JwtStrategy],
 })
 export class AuthModule {}

@@ -3,39 +3,29 @@ import { JwtService } from '@nestjs/jwt'
 import bcrypt from 'bcryptjs'
 import { UsersRepository } from 'src/modules/users/repositories/users-repository'
 import { Payload } from '../types/payload.type'
-import { SignupInput, SignupOutput } from '../types/signup.type'
+import { SignupRequest, SignupResponse } from '../types/signup.type'
 
 @Injectable()
 export class SignupUseCase {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    private readonly usersRepo: UsersRepository,
     private readonly jwtService: JwtService,
   ) {}
 
-  async execute(input: SignupInput): Promise<SignupOutput> {
+  async execute(input: SignupRequest): Promise<SignupResponse> {
     const hashSalt = await bcrypt.genSalt(12)
     const hash = await bcrypt.hash(input.password, hashSalt)
 
-    const user = await this.usersRepository.findByEmail({
-      email: input.email,
-    })
+    const user = await this.usersRepo.getByEmail(input.email)
 
     if (user) {
-      throw new ConflictException('Email already in use.')
+      throw new ConflictException('E-mail already in use.')
     }
 
-    const createdUser = await this.usersRepository.create({
-      name: input.name,
-      email: input.email,
-      password: hash,
-    })
+    const newUser = await this.usersRepo.create({ ...input, password: hash })
 
-    const accessToken = await this.jwtService.signAsync<Payload>({
-      sub: createdUser.id,
-    })
+    const accessToken = await this.jwtService.signAsync<Payload>({ sub: newUser.id })
 
-    return {
-      accessToken,
-    }
+    return { accessToken }
   }
 }
