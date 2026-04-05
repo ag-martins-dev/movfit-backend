@@ -1,7 +1,6 @@
 import { BiologicalSex, Goal } from 'generated/prisma/enums'
 
-export type CompleteOnboardingInput = {
-  userId: string
+export type CompleteProfileRequest = {
   goal: Goal
   biologicalSex: BiologicalSex
   birthDate: Date

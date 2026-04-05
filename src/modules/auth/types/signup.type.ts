@@ -1,9 +1,9 @@
-export type SignupInput = {
+export type SignupRequest = {
   name: string
   email: string
   password: string
 }
 
-export type SignupOutput = {
+export type SignupResponse = {
   accessToken: string
 }
