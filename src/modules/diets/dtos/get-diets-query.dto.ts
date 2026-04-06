@@ -5,5 +5,5 @@ export class GetDietsQueryDTO {
   @IsBoolean()
   @IsOptional()
   @Type(() => Boolean)
-  isActive?: boolean
+  readonly isActive?: boolean
 }

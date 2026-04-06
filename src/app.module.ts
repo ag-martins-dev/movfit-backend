@@ -7,6 +7,7 @@ import { DietsModule } from './modules/diets/diets.module'
 import { ProfileModule } from './modules/profile/profile.module'
 import { UsersModule } from './modules/users/users.module'
 import { WaterConsumptionModule } from './modules/water-consumption/water-consumption.module'
+import { WaterConsumptionHistoryModule } from './modules/water-consumption-history/water-consumption-history.module'
 import { WorkoutConfigModule } from './modules/workout-config/workout-config.module'
 
 @Module({
@@ -16,6 +17,7 @@ import { WorkoutConfigModule } from './modules/workout-config/workout-config.mod
     AuthModule,
     DailyNutritionModule,
     WaterConsumptionModule,
+    WaterConsumptionHistoryModule,
     WorkoutConfigModule,
     ProfileModule,
     DietsModule,
