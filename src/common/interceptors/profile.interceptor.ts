@@ -19,24 +19,18 @@ export class ProfileInterceptor implements NestInterceptor {
 
   async intercept(context: ExecutionContext, next: CallHandler) {
     const requireProfile = this.reflector.get('REQUIRE_PROFILE', context.getHandler())
-
     if (requireProfile) {
       const request = context.switchToHttp().getRequest()
       const user = request.user
-
       const profile = await this.profileRepo.getProfile(user.id)
-
       if (!profile) {
         throw new InternalServerErrorException(
           'Profile inconsistency: expected profile but not found.',
         )
       }
-
       this.requestContext.setProfile = profile
-
       return next.handle()
     }
-
     return next.handle()
   }
 }

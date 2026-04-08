@@ -14,7 +14,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isAuthenticated) {
       const request = context.switchToHttp().getRequest()
       const user = request.user
-
       this.requestContext.setUser = user
     }
 
