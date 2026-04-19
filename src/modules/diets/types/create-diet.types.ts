@@ -25,5 +25,4 @@ export type CreateDietRepositoryInput = {
   totalProteinsInGrams: number
   totalCarbsInGrams: number
   totalFatsInGrams: number
-  dietId: string
 }
