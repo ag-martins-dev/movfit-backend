@@ -12,12 +12,14 @@ export class GetTodayNutritionProgressUseCase {
   ) {}
 
   async execute(userId: string): Promise<GetTodayNutritionProgressOutput> {
+    // TODO: Chama o request context aqui:
     const user = await this.usersRepository.findWithDietsAndTimezone(userId)
 
     if (!user) {
       throw new NotFoundException('User not found.')
     }
 
+    // TODO: E melhora aqui:
     if (!user.profile?.timezone) {
       throw new BadRequestException('Timezone is not defined.')
     }
@@ -46,26 +48,26 @@ export class GetTodayNutritionProgressUseCase {
 
     const todayNutritionProgress = {
       carbs: {
-        goalInGrams: activeDiet.carbsInGrams,
+        goalInGrams: activeDiet.totalCarbsInGrams,
         totalConsumedInGrams: todayNutrition.carbsInGrams,
         totalConsumedInPercentage: toPercentage({
-          goal: activeDiet.carbsInGrams,
+          goal: activeDiet.totalCarbsInGrams,
           current: todayNutrition.carbsInGrams,
         }),
       },
       proteins: {
-        goalInGrams: activeDiet.proteinsInGrams,
+        goalInGrams: activeDiet.totalProteinsInGrams,
         totalConsumedInGrams: todayNutrition.proteinsInGrams,
         totalConsumedInPercentage: toPercentage({
-          goal: activeDiet.proteinsInGrams,
+          goal: activeDiet.totalProteinsInGrams,
           current: todayNutrition.proteinsInGrams,
         }),
       },
       fats: {
-        goalInGrams: activeDiet.fatsInGrams,
+        goalInGrams: activeDiet.totalFatsInGrams,
         totalConsumedInGrams: todayNutrition.fatsInGrams,
         totalConsumedInPercentage: toPercentage({
-          goal: activeDiet.fatsInGrams,
+          goal: activeDiet.totalFatsInGrams,
           current: todayNutrition.fatsInGrams,
         }),
       },
