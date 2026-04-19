@@ -1,8 +1,8 @@
-import { randomUUID } from 'node:crypto'
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { Food } from 'generated/prisma/client'
 import { PortionUnit } from 'generated/prisma/enums'
 import { RequestContextService } from 'src/common/services/request-context.service'
+import { TransactionService } from 'src/common/services/transaction.service'
 import { FoodsRepository } from 'src/modules/foods/repositories/foods.repository'
 import { MealsRepository } from 'src/modules/meals/repositories/meals.repository'
 import { DietsRepository } from '../repositories/diets.repository'
@@ -15,24 +15,20 @@ export class CreateDietUseCase {
     private readonly mealsRepo: MealsRepository,
     private readonly foodsRepo: FoodsRepository,
     private readonly requestContext: RequestContextService,
+    private readonly transaction: TransactionService,
   ) {}
 
   async execute(request: CreateDietUseCaseInput) {
-    // Destructuring name, goal and meals received from request
     const { name: dietName, goal: dietGoal, meals: dietMeals } = request
 
-    // Get userId from request context and generating future dietId
     const userId = this.requestContext.getUserId
-    const dietId = randomUUID()
 
     const mealsTimes = dietMeals.map((dietMeal) => dietMeal.timeInMinutes)
 
-    // Ensure that doesn't has duplicate meals times
     if (new Set(mealsTimes).size !== mealsTimes.length) {
       throw new BadRequestException('Duplicate meal time')
     }
 
-    // Sorting diet meals
     // TODO: In the future, to remove this, add an "order" property to Meal inside schema, to control order of each diet meal
     const meals = dietMeals.sort((a, b) => a.timeInMinutes - b.timeInMinutes)
 
@@ -91,38 +87,38 @@ export class CreateDietUseCase {
       { caloriesInKcal: 0, carbsInGrams: 0, fatsInGrams: 0, proteinsInGrams: 0 },
     )
 
-    const activeDiet = await this.dietsRepo.getActive(userId)
+    return await this.transaction.run(async () => {
+      const activeDiet = await this.dietsRepo.getActive(userId)
 
-    if (activeDiet) {
-      await this.dietsRepo.deactive(activeDiet.id, userId)
-    }
+      if (activeDiet) {
+        await this.dietsRepo.deactive(activeDiet.id, userId)
+      }
 
-    const newDiet = await this.dietsRepo.create(userId, {
-      dietId,
-      goal: dietGoal,
-      name: dietName,
-      totalCaloriesInKcal: dietTotalMacros.caloriesInKcal,
-      totalCarbsInGrams: dietTotalMacros.carbsInGrams,
-      totalFatsInGrams: dietTotalMacros.fatsInGrams,
-      totalProteinsInGrams: dietTotalMacros.proteinsInGrams,
-    })
+      const createdDiet = await this.dietsRepo.create(userId, {
+        goal: dietGoal,
+        name: dietName,
+        totalCaloriesInKcal: dietTotalMacros.caloriesInKcal,
+        totalCarbsInGrams: dietTotalMacros.carbsInGrams,
+        totalFatsInGrams: dietTotalMacros.fatsInGrams,
+        totalProteinsInGrams: dietTotalMacros.proteinsInGrams,
+      })
 
-    await Promise.all(
-      computedMeals.map((meal) =>
-        this.mealsRepo.create({
-          dietId,
+      // TODO: trocar por mealsRepo.createMany
+      for (const meal of computedMeals) {
+        await this.mealsRepo.create({
+          dietId: createdDiet.id,
           name: meal.name,
+          foods: meal.foods,
           timeInMinutes: meal.timeInMinutes,
           totalCaloriesInKcal: meal.mealTotalMacros.caloriesInKcal,
           totalProteinsInGrams: meal.mealTotalMacros.proteinsInGrams,
           totalCarbsInGrams: meal.mealTotalMacros.carbsInGrams,
           totalFatsInGrams: meal.mealTotalMacros.fatsInGrams,
-          foods: meal.foods,
-        }),
-      ),
-    )
+        })
+      }
 
-    return newDiet
+      return createdDiet
+    })
   }
 
   private convertToGrams(amount: number, unit: PortionUnit) {
