@@ -11,6 +11,6 @@ export class DeleteDietUseCase {
 
     if (!diet) throw new NotFoundException('Diet not found.')
 
-    await this.dietsRepo.delete(diet.id)
+    await this.dietsRepo.delete(diet.id, input.userId)
   }
 }
