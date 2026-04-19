@@ -1,36 +1,35 @@
 import { Injectable } from '@nestjs/common'
 import { Food } from 'generated/prisma/client'
+import { BaseRepository } from 'src/common/repositories/base.repository'
+import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
 import { GetAllFoodsByCategoryInput, GetAllFoodsInput } from '../types/get-all-foods.types'
 import { SaveFoodInput } from '../types/save-food.types'
 import { FoodsRepository } from './foods.repository'
 
 @Injectable()
-export class PrismaFoodsRepository implements FoodsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class PrismaFoodsRepository extends BaseRepository implements FoodsRepository {
+  constructor(
+    readonly prisma: PrismaService,
+    readonly transactionContext: TransactionContextService,
+  ) {
+    super(prisma, transactionContext)
+  }
 
   async getOne(foodId: string): Promise<Food | null> {
-    const food = await this.prisma.food.findFirst({
+    return await this.db.food.findFirst({
       where: { id: foodId },
     })
-    if (!food) return null
-    return food
   }
 
   async getManyByIds(foodIds: string[]): Promise<Food[]> {
-    if (!foodIds.length) return []
-
-    const uniqueIds = [...new Set(foodIds)]
-
-    const foods = await this.prisma.food.findMany({
-      where: { id: { in: uniqueIds } },
+    return await this.db.food.findMany({
+      where: { id: { in: foodIds } },
     })
-
-    return foods
   }
 
   async save(userId: string, input: SaveFoodInput): Promise<Food> {
-    const savedFood = await this.prisma.food.create({
+    return await this.db.food.create({
       data: {
         userId,
         name: input.name,
@@ -43,33 +42,23 @@ export class PrismaFoodsRepository implements FoodsRepository {
         isCustom: true,
       },
     })
-    return savedFood
   }
 
   async getAll(userId: string, input: GetAllFoodsInput): Promise<Food[]> {
-    const where = input.isRecipe === undefined ? { userId } : { userId, isRecipe: input.isRecipe }
-    const foods = await this.prisma.food.findMany({
-      where,
+    return await this.db.food.findMany({
+      where: { userId },
       orderBy: { name: 'asc' },
       take: input.limit,
       skip: input.offset,
     })
-    return foods
   }
 
   async getAllByCategory(userId: string, input: GetAllFoodsByCategoryInput): Promise<Food[]> {
-    const where =
-      input.isRecipe === undefined
-        ? { userId, category: input.category }
-        : { userId, isRecipe: input.isRecipe, category: input.category }
-    const foods = await this.prisma.food.findMany({
-      where,
-      orderBy: {
-        name: 'asc',
-      },
+    return await this.db.food.findMany({
+      where: { AND: { userId, category: input.category } },
+      orderBy: { name: 'asc' },
       take: input.limit,
       skip: input.offset,
     })
-    return foods
   }
 }
