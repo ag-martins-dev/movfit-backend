@@ -9,9 +9,11 @@ export class PrismaService extends PrismaClient implements OnModuleDestroy, OnMo
     const adapter = new PrismaPg({ connectionString })
     super({ adapter })
   }
+
   async onModuleInit() {
     await this.$connect()
   }
+
   async onModuleDestroy() {
     await this.$disconnect()
   }
