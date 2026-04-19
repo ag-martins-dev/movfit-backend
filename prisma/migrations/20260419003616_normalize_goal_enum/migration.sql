@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "Goal" ADD VALUE 'DEFINE';
