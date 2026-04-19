@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common'
 import { DailyNutrition } from 'generated/prisma/client'
 import { getTodayInTimezone } from 'src/common/helpers/get-today-in-timezone.helper'
+import { BaseRepository } from 'src/common/repositories/base.repository'
+import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
 import { GetTodayNutritionInput } from '../types/get-today-nutrition.type'
-import {
-  UpsertTodayNutritionInput,
-  UpsertTodayNutritionOutput,
-} from '../types/upsert-today-nutrition.type'
+import { UpsertTodayNutritionInput, UpsertTodayNutritionOutput } from '../types/upsert-today-nutrition.type'
 import { DailyNutritionRepository } from './daily-nutrition.repository'
 
 @Injectable()
-export class PrismaDailyNutritionRepository implements DailyNutritionRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class PrismaDailyNutritionRepository extends BaseRepository implements DailyNutritionRepository {
+  constructor(
+    readonly prisma: PrismaService,
+    readonly transactionContext: TransactionContextService,
+  ) {
+    super(prisma, transactionContext)
+  }
 
   private incrementIfDefined(value?: number) {
     return value !== undefined ? { increment: value } : undefined
   }
 
-  async upsertTodayNutrition(
-    input: UpsertTodayNutritionInput,
-  ): Promise<UpsertTodayNutritionOutput> {
-    const dailyNutrition = await this.prisma.dailyNutrition.upsert({
+  // TODO: Update this shit too
+  async upsertTodayNutrition(input: UpsertTodayNutritionInput): Promise<UpsertTodayNutritionOutput> {
+    const dailyNutrition = await this.db.dailyNutrition.upsert({
       where: {
         userId_day: {
           userId: input.userId,
@@ -50,7 +53,7 @@ export class PrismaDailyNutritionRepository implements DailyNutritionRepository 
   }
 
   async getTodayNutrition(input: GetTodayNutritionInput): Promise<DailyNutrition | null> {
-    const dailyNutrition = await this.prisma.dailyNutrition.findFirst({
+    const dailyNutrition = await this.db.dailyNutrition.findFirst({
       where: {
         userId: input.userId,
         day: getTodayInTimezone(input.timezone),
