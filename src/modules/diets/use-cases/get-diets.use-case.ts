@@ -16,9 +16,9 @@ export class GetDietsUseCase {
       goal: diet.goal,
       createdAt: diet.createdAt,
       macros: {
-        caloriesInKcal: diet.caloriesInKcal,
-        proteinsInGrams: diet.proteinsInGrams,
-        carbsInGrams: diet.carbsInGrams,
+        caloriesInKcal: diet.totalCaloriesInKcal,
+        proteinsInGrams: diet.totalProteinsInGrams,
+        carbsInGrams: diet.totalCarbsInGrams,
       },
     }))
   }
