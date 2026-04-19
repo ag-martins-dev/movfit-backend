@@ -1,20 +1,25 @@
 import { Injectable } from '@nestjs/common'
+import { BaseRepository } from 'src/common/repositories/base.repository'
+import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { AuthUser, AuthUserWithProfile } from 'src/common/types/auth-user.types'
-import {
-  PublicUser,
-  PublicUserWithProfileAndWorkoutConfig,
-} from 'src/common/types/public-user.types'
+import { PublicUser, PublicUserWithProfileAndWorkoutConfig } from 'src/common/types/public-user.types'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
 import { CreateUserInput } from '../types/create-user.type'
 import { SelectTimezone, UserWithDietsAndTimezone, UserWithProfile } from '../types/users.type'
 import { UsersRepository } from './users-repository'
 
 @Injectable()
-export class PrismaUsersRepository implements UsersRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class PrismaUsersRepository extends BaseRepository implements UsersRepository {
+  constructor(
+    readonly prisma: PrismaService,
+    readonly transactionContext: TransactionContextService,
+  ) {
+    super(prisma, transactionContext)
+  }
 
+  // TODO: Update THIS!!!! (You absolutely need to fix this BULLSHIT!)
   async me(userId: string): Promise<PublicUserWithProfileAndWorkoutConfig | null> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: { id: userId },
       include: { profile: true, workoutConfig: true },
     })
@@ -34,7 +39,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async create(input: CreateUserInput): Promise<PublicUser> {
-    const user = await this.prisma.user.create({
+    const user = await this.db.user.create({
       data: {
         name: input.name,
         email: input.email,
@@ -51,7 +56,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async getById(userId: string): Promise<AuthUser | null> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: { id: userId },
     })
 
@@ -69,7 +74,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async getByEmail(email: string): Promise<PublicUser | null> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: { email: email },
     })
 
@@ -86,7 +91,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async getByEmailForAuth(email: string): Promise<AuthUser | null> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: { email },
     })
 
@@ -104,7 +109,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async getAuthUserWithProfile(userId: string): Promise<AuthUserWithProfile | null> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: { id: userId },
       include: {
         profile: true,
@@ -126,7 +131,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async findWithProfile(userId: string): Promise<UserWithProfile | null> {
-    const userWithProfile = await this.prisma.user.findUnique({
+    const userWithProfile = await this.db.user.findUnique({
       where: { id: userId },
       select: { profile: true },
     })
@@ -134,7 +139,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async findWithTimezone(userId: string): Promise<SelectTimezone | null> {
-    const userTimezone = await this.prisma.user.findUnique({
+    const userTimezone = await this.db.user.findUnique({
       where: { id: userId },
       select: {
         profile: {
@@ -146,7 +151,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async findWithDietsAndTimezone(userId: string): Promise<UserWithDietsAndTimezone | null> {
-    const userWithDietsAndTimezone = await this.prisma.user.findUnique({
+    const userWithDietsAndTimezone = await this.db.user.findUnique({
       where: { id: userId },
       select: {
         diets: true,
