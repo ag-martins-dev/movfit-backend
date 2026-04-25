@@ -1,3 +1,6 @@
 import { SetMetadata } from '@nestjs/common'
+import { constants } from 'src/common/constants'
 
-export const RequireWorkoutConfig = () => SetMetadata('REQUIRE_WORKOUT_CONFIG', true)
+export const RequireWorkoutConfig = () => {
+  return SetMetadata(constants.REQUIRE_WORKOUT_CONFIG_KEY, true)
+}
