@@ -7,9 +7,9 @@ export class GetActiveDietUseCase {
 
   async execute(userId: string) {
     const activeDiet = await this.dietsRepo.getActive(userId)
-    if (!activeDiet) {
-      return null
-    }
+
+    if (!activeDiet) return null
+
     return {
       id: activeDiet.id,
       isActive: activeDiet.isActive,
@@ -19,6 +19,7 @@ export class GetActiveDietUseCase {
         caloriesInKcal: activeDiet.totalCaloriesInKcal,
         proteinsInGrams: activeDiet.totalProteinsInGrams,
         carbsInGrams: activeDiet.totalCarbsInGrams,
+        fats: activeDiet.totalFatsInGrams,
       },
     }
   }
