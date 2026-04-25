@@ -1,5 +1,5 @@
 import { Injectable, Scope } from '@nestjs/common'
-import { DailyWaterConsumption, Profile, WorkoutConfig } from 'generated/prisma/client'
+import { DailyWaterConsumption, Diet, Profile, WorkoutConfig } from 'generated/prisma/client'
 import { AuthUser } from '../types/auth-user.types'
 
 @Injectable({ scope: Scope.REQUEST })
@@ -8,6 +8,7 @@ export class RequestContextService {
   private _profile: Profile
   private _workoutConfig: WorkoutConfig
   private _dailyWaterConsumption: DailyWaterConsumption
+  private _activeDiet: Diet
 
   set setUser(user: AuthUser) {
     this._user = user
@@ -25,6 +26,10 @@ export class RequestContextService {
     this._dailyWaterConsumption = dailyWaterConsumption
   }
 
+  set setActiveDiet(activeDiet: Diet) {
+    this._activeDiet = activeDiet
+  }
+
   get getUser(): AuthUser {
     return this._user
   }
@@ -39,6 +44,10 @@ export class RequestContextService {
 
   get getDailyWaterConsumption(): DailyWaterConsumption {
     return this._dailyWaterConsumption
+  }
+
+  get getActiveDiet(): Diet {
+    return this._activeDiet
   }
 
   get getUserId(): string {
