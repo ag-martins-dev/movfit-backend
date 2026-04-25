@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
+import { User } from 'generated/prisma/client'
 import { BaseRepository } from 'src/common/repositories/base.repository'
 import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { AuthUser, AuthUserWithProfile } from 'src/common/types/auth-user.types'
-import { PublicUser, PublicUserWithProfileAndWorkoutConfig } from 'src/common/types/public-user.types'
+import { PublicUser } from 'src/common/types/public-user.types'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
 import { CreateUserInput } from '../types/create-user.type'
 import { SelectTimezone, UserWithDietsAndTimezone, UserWithProfile } from '../types/users.type'
@@ -17,25 +18,11 @@ export class PrismaUsersRepository extends BaseRepository implements UsersReposi
     super(prisma, transactionContext)
   }
 
-  // TODO: Update THIS!!!! (You absolutely need to fix this BULLSHIT!)
-  async me(userId: string): Promise<PublicUserWithProfileAndWorkoutConfig | null> {
-    const user = await this.db.user.findUnique({
+  async me(userId: string): Promise<User | null> {
+    return await this.db.user.findUnique({
       where: { id: userId },
       include: { profile: true, workoutConfig: true },
     })
-
-    if (!user) {
-      return null
-    }
-
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      isOnboardingCompleted: user.isOnboardingCompleted,
-      profile: user.profile,
-      workoutConfig: user.workoutConfig,
-    }
   }
 
   async create(input: CreateUserInput): Promise<PublicUser> {

@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common'
+import { User } from 'generated/prisma/client'
 import { AuthUser, AuthUserWithProfile } from 'src/common/types/auth-user.types'
-import {
-  PublicUser,
-  PublicUserWithProfileAndWorkoutConfig,
-} from 'src/common/types/public-user.types'
+import { PublicUser } from 'src/common/types/public-user.types'
 import { CreateUserInput } from '../types/create-user.type'
 import { SelectTimezone, UserWithDietsAndTimezone, UserWithProfile } from '../types/users.type'
 
 @Injectable()
 export abstract class UsersRepository {
-  abstract me(userId: string): Promise<PublicUserWithProfileAndWorkoutConfig | null>
+  abstract me(userId: string): Promise<User | null>
   abstract create(input: CreateUserInput): Promise<PublicUser>
 
   abstract getAuthUserWithProfile(userId: string): Promise<AuthUserWithProfile | null>
