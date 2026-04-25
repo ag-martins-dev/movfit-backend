@@ -1,27 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsInt, IsOptional, IsPositive } from 'class-validator'
 
-export class UpdateTodayNutritionRequestDto {
-  @ApiProperty({ type: 'number', required: false })
+export class UpdateTodayNutritionRequestDTO {
+  @ApiProperty({ type: 'integer', required: false })
   @IsInt()
   @IsPositive()
   @IsOptional()
   readonly proteinsInGrams?: number
 
-  @ApiProperty({ type: 'number', required: false })
+  @ApiProperty({ type: 'integer', required: false })
   @IsInt()
   @IsPositive()
   @IsOptional()
   readonly carbsInGrams?: number
 
-  @ApiProperty({ type: 'number', required: false })
+  @ApiProperty({ type: 'integer', required: false })
   @IsInt()
   @IsPositive()
   @IsOptional()
   readonly fatsInGrams?: number
 }
 
-export class UpdateTodayNutritionResponseDto {
+export class UpdateTodayNutritionResponseDTO {
+  @ApiProperty({ type: 'string', format: 'uuid' })
+  readonly id: string
+
   @ApiProperty({ type: Date })
   readonly day: Date
 

@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger'
 
 class MacroProgressDto {
-  @ApiProperty({ type: 'number' })
-  readonly goalInGrams: number
+  @ApiProperty({ type: 'integer' })
+  readonly targetInGrams: number
 
-  @ApiProperty({ type: 'number' })
-  readonly totalConsumedInGrams: number
+  @ApiProperty({ type: 'integer' })
+  readonly totalConsumptionInGrams: number
 
-  @ApiProperty({ type: 'number' })
-  readonly totalConsumedInPercentage: number
+  @ApiProperty({ type: 'integer' })
+  readonly progress: number
 }
 
 export class GetTodayNutritionProgressResponseDto {
