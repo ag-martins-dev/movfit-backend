@@ -15,13 +15,13 @@ export class PrismaWorkoutConfigRepository extends BaseRepository implements Wor
     super(prisma, transactionContext)
   }
 
-  async getWorkoutConfig(userId: string): Promise<WorkoutConfig | null> {
+  async get(userId: string): Promise<WorkoutConfig | null> {
     return await this.db.workoutConfig.findFirst({
       where: { userId },
     })
   }
 
-  async registerWorkoutConfig(userId: string, input: RegisterWorkoutConfigInput): Promise<WorkoutConfig> {
+  async register(userId: string, input: RegisterWorkoutConfigInput): Promise<WorkoutConfig> {
     return await this.db.workoutConfig.create({
       data: {
         userId,

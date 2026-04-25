@@ -4,10 +4,6 @@ import { RegisterWorkoutConfigInput } from '../types/register-workout-config.typ
 
 @Injectable()
 export abstract class WorkoutConfigRepository {
-  abstract getWorkoutConfig(userId: string): Promise<WorkoutConfig | null>
-
-  abstract registerWorkoutConfig(
-    userId: string,
-    input: RegisterWorkoutConfigInput,
-  ): Promise<WorkoutConfig>
+  abstract get(userId: string): Promise<WorkoutConfig | null>
+  abstract register(userId: string, input: RegisterWorkoutConfigInput): Promise<WorkoutConfig>
 }
