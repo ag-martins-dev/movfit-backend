@@ -1,17 +1,17 @@
 export class GetTodayNutritionProgressOutput {
   carbs: {
-    goalInGrams: number
-    totalConsumedInGrams: number
-    totalConsumedInPercentage: number
+    targetInGrams: number
+    totalConsumptionInGrams: number
+    progress: number
   }
   proteins: {
-    goalInGrams: number
-    totalConsumedInGrams: number
-    totalConsumedInPercentage: number
+    targetInGrams: number
+    totalConsumptionInGrams: number
+    progress: number
   }
   fats: {
-    goalInGrams: number
-    totalConsumedInGrams: number
-    totalConsumedInPercentage: number
+    targetInGrams: number
+    totalConsumptionInGrams: number
+    progress: number
   }
 }

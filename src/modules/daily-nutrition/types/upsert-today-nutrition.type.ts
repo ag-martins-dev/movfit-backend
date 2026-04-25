@@ -1,5 +1,3 @@
-import { DailyNutritionGetPayload } from 'generated/prisma/models'
-
 export type UpsertTodayNutritionInput = {
   userId: string
   timezone: string
@@ -7,12 +5,3 @@ export type UpsertTodayNutritionInput = {
   proteinsInGrams?: number
   fatsInGrams?: number
 }
-
-export type UpsertTodayNutritionOutput = DailyNutritionGetPayload<{
-  select: {
-    day: true
-    carbsInGrams: true
-    fatsInGrams: true
-    proteinsInGrams: true
-  }
-}>
