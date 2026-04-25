@@ -32,10 +32,7 @@ export class GetWaterConsumptionProgressUseCase {
     return {
       targetConsumptionInMl: dailyWaterConsumption.targetInMl,
       totalConsumptionInMl: todayTotalConsumptionInMl,
-      progress: toPercentage({
-        goal: dailyWaterConsumption.targetInMl,
-        current: todayTotalConsumptionInMl,
-      }),
+      progress: toPercentage(dailyWaterConsumption.targetInMl, todayTotalConsumptionInMl),
     }
   }
 }
