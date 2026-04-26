@@ -1,7 +1,8 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common'
-import { ApiResponse } from '@nestjs/swagger'
+import { ApiCreatedResponse } from '@nestjs/swagger'
+import { Throttle } from 'node_modules/@nestjs/throttler/dist'
 import { SigninRequestDto, SigninResponseDto } from '../dtos/signin.dto'
-import { SignupRequestDto } from '../dtos/signup.dto'
+import { SignupRequestDto, SignupResponseDto } from '../dtos/signup.dto'
 import { SigninUseCase } from '../use-cases/signin.use-case'
 import { SignupUseCase } from '../use-cases/signup.use-case'
 
@@ -12,22 +13,18 @@ export class AuthController {
     private readonly signupUseCase: SignupUseCase,
   ) {}
 
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: SigninResponseDto,
-  })
+  @Throttle({ auth: { ttl: 60000, limit: 5 } })
+  @ApiCreatedResponse({ type: SigninResponseDto })
+  @HttpCode(HttpStatus.CREATED)
   @Post('/signin')
-  @HttpCode(HttpStatus.OK)
   async signin(@Body() dto: SigninRequestDto) {
     return this.signinUseCase.execute(dto)
   }
 
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    type: SigninResponseDto,
-  })
-  @Post('/signup')
+  @Throttle({ auth: { ttl: 60000, limit: 5 } })
+  @ApiCreatedResponse({ type: SignupResponseDto })
   @HttpCode(HttpStatus.CREATED)
+  @Post('/signup')
   async signup(@Body() dto: SignupRequestDto) {
     return this.signupUseCase.execute(dto)
   }
