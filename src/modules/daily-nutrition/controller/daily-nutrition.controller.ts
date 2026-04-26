@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Patch, UseGuards, UseInterceptors } from '@nestjs/common'
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
+import { Throttle } from '@nestjs/throttler/dist'
 import { RequireActiveDiet } from 'src/common/decorators/require-active-diet.decorator'
 import { RequireProfile } from 'src/common/decorators/require-profile.decorator'
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard'
@@ -19,20 +20,22 @@ export class DailyNutritionController {
     private readonly updateUpdateTodayNutritionProgressUseCase: UpdateTodayNutritionProgressUseCase,
   ) {}
 
-  @Get()
+  @Throttle({ heavy: { ttl: 60000, limit: 5 } })
   @RequireProfile()
   @RequireActiveDiet()
   @UseInterceptors(ProfileInterceptor, ActiveDietInterceptor)
   @ApiOkResponse({ type: GetTodayNutritionProgressResponseDto })
+  @Get()
   getTodayNutritionProgress() {
     return this.getTodayGetTodayNutritionProgressUseCase.execute()
   }
 
-  @Patch()
+  @Throttle({ heavy: { ttl: 60000, limit: 5 } })
   @RequireProfile()
   @UseInterceptors(ProfileInterceptor)
-  @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ type: UpdateTodayNutritionResponseDTO })
+  @HttpCode(HttpStatus.CREATED)
+  @Patch()
   updateTodayNutritionProgress(@Body() body: UpdateTodayNutritionRequestDTO) {
     return this.updateUpdateTodayNutritionProgressUseCase.execute({
       carbsInGrams: body.carbsInGrams,
