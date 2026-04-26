@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Query, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Query, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/common/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard'
 import { OnboardingGuard } from 'src/common/guards/onboarding.guard'
@@ -30,6 +30,7 @@ export class DietsController {
     return this.getDietsUseCase.execute(user.id)
   }
 
+  @HttpCode(HttpStatus.CREATED)
   @Post()
   createDiet(@Body() body: CreateDietRequestBodyDTO) {
     return this.createDietUseCase.execute({
@@ -39,6 +40,7 @@ export class DietsController {
     })
   }
 
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
   deleteDiet(@CurrentUser() user: AuthUser, @Query() query: DeleteDietQueryDTO) {
     return this.deleteDietUseCase.execute({
