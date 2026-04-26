@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UseGuards } from '@nestjs/common'
+import { Throttle } from '@nestjs/throttler/dist'
 import { CurrentUser } from 'src/common/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard'
 import { OnboardingGuard } from 'src/common/guards/onboarding.guard'
@@ -28,8 +29,13 @@ export class FoodsController {
     })
   }
 
+  @Throttle({ heavy: { ttl: 60000, limit: 5 } })
+  @HttpCode(HttpStatus.CREATED)
   @Post()
   async saveFood(@CurrentUser() user: AuthUser, @Body() body: SaveFoodRequestDTO) {
-    return this.saveFoodUseCase.execute({ userId: user.id, ...body })
+    return this.saveFoodUseCase.execute({
+      userId: user.id,
+      ...body,
+    })
   }
 }
