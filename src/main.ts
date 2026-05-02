@@ -1,4 +1,3 @@
-import helmet from '@fastify/helmet'
 import { ValidationPipe, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
@@ -12,19 +11,25 @@ async function bootstrap() {
   app.enableCors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    credentials: true,
+    // credentials: true,
   })
 
-  app.enableVersioning({ type: VersioningType.URI })
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  })
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }))
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }),
+  )
 
   const config = new DocumentBuilder()
     .setTitle('Movfit API')
     .setDescription('Movfit API documentation')
     .setVersion('1.0')
-    .addTag('movfit-api')
-    .addBearerAuth()
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
@@ -32,13 +37,25 @@ async function bootstrap() {
   app.use(
     '/docs',
     apiReference({
-      theme: 'purple',
+      _integration: 'fastify',
+      theme: 'kepler',
+      darkMode: true,
+      authentication: {
+        preferredSecurityScheme: 'BearerAuth',
+        securitySchemes: {
+          BearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
       content: document,
       withFastify: true,
     }),
   )
 
-  await app.register(() => helmet)
+  await app.register(require('@fastify/helmet'))
   await app.listen(process.env.PORT ?? 4949)
 }
 bootstrap()
