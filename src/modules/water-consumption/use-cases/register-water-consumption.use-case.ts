@@ -1,33 +1,36 @@
 import { Injectable } from '@nestjs/common'
-import { getTodayInTimezone } from 'src/common/helpers/get-today-in-timezone.helper'
+import { formatDateToBrFormat } from 'src/common/helpers/format-date-to-br-format.helper'
+import { parseDateToTime } from 'src/common/helpers/parse-date-to-time.helper'
 import { RequestContextService } from 'src/common/services/request-context.service'
-import { WaterConsumptionRepository } from '../repositories/water-consumption.repository'
-import { RegisterWaterConsumptionInput } from '../types/register-water-consumption.types'
+import { WaterConsumptionRepository } from 'src/modules/water-consumption/repositories/water-consumption.repository'
+import { RegisterWaterConsumptionOutput } from 'src/modules/water-consumption/types'
 
 @Injectable()
 export class RegisterWaterConsumptionUseCase {
   constructor(
-    private readonly waterConsumptionRepo: WaterConsumptionRepository,
+    private readonly waterConsumptionRepository: WaterConsumptionRepository,
     private readonly requestContext: RequestContextService,
   ) {}
 
-  async execute(input: RegisterWaterConsumptionInput) {
+  async execute(amountConsumedInMl: number): Promise<RegisterWaterConsumptionOutput> {
     const userId = this.requestContext.getUserId
     const dailyWaterConsumption = this.requestContext.getDailyWaterConsumption
 
     const { timezone } = this.requestContext.getProfile
-    const todayInTimezone = getTodayInTimezone(timezone)
+    const dateOfConsumption = new Date()
 
-    const updatedConsumption = await this.waterConsumptionRepo.register(userId, {
+    const waterConsumption = await this.waterConsumptionRepository.create({
       dailyWaterConsumptionId: dailyWaterConsumption.id,
-      amountConsumedInMl: input.amountConsumedInMl,
-      dateOfConsumption: todayInTimezone,
+      userId,
+      dateOfConsumption,
+      amountConsumedInMl,
     })
 
     return {
-      id: updatedConsumption.id,
-      amountConsumedInMl: updatedConsumption.amountConsumedInMl,
-      dateOfConsumption: updatedConsumption.dateOfConsumption,
+      id: waterConsumption.id,
+      amountConsumedInMl: waterConsumption.amountConsumedInMl,
+      consumptionDate: formatDateToBrFormat(waterConsumption.dateOfConsumption, timezone),
+      consumptionTime: parseDateToTime(waterConsumption.dateOfConsumption, timezone),
     }
   }
 }

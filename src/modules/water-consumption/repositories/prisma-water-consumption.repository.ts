@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { WaterConsumption } from 'generated/prisma/client'
-import { BaseRepository } from 'src/common/repositories/base.repository'
 import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
-import { GetWaterConsumptionHistoryInput } from '../types/get-water-consumption-history.type'
-import { RegisterWaterConsumptionRepositoryInput } from '../types/register-water-consumption.types'
-import { WaterConsumptionRepository } from './water-consumption.repository'
+import { BaseRepository } from 'src/infra/database/repositories/base.repository'
+import { WaterConsumptionRepository } from 'src/modules/water-consumption/repositories/water-consumption.repository'
+import {
+  GetWaterConsumptionHistoryRepositoryInput,
+  RegisterWaterConsumptionRepositoryInput,
+} from 'src/modules/water-consumption/types'
 
 @Injectable()
 export class PrismaWaterConsumptionRepository extends BaseRepository implements WaterConsumptionRepository {
@@ -16,20 +18,26 @@ export class PrismaWaterConsumptionRepository extends BaseRepository implements 
     super(prisma, transactionContext)
   }
 
-  async history(userId: string, input: GetWaterConsumptionHistoryInput): Promise<WaterConsumption[]> {
+  async findHistory(input: GetWaterConsumptionHistoryRepositoryInput): Promise<WaterConsumption[]> {
     return await this.db.waterConsumption.findMany({
       where: {
-        userId,
-        dateOfConsumption: { gte: input.fromDate, lte: input.toDate },
+        userId: input.userId,
+        dateOfConsumption: {
+          gte: input.fromDate,
+          lte: input.toDate,
+        },
+      },
+      orderBy: {
+        dateOfConsumption: 'desc',
       },
     })
   }
 
-  async register(userId: string, input: RegisterWaterConsumptionRepositoryInput): Promise<WaterConsumption> {
+  async create(input: RegisterWaterConsumptionRepositoryInput): Promise<WaterConsumption> {
     return await this.db.$transaction(async (tx) => {
       const waterConsumption = await tx.waterConsumption.create({
         data: {
-          userId,
+          userId: input.userId,
           dailyWaterConsumptionId: input.dailyWaterConsumptionId,
           amountConsumedInMl: input.amountConsumedInMl,
           dateOfConsumption: input.dateOfConsumption,
@@ -37,7 +45,7 @@ export class PrismaWaterConsumptionRepository extends BaseRepository implements 
       })
 
       await tx.dailyWaterConsumption.update({
-        where: { userId, id: input.dailyWaterConsumptionId },
+        where: { userId: input.userId, id: input.dailyWaterConsumptionId },
         data: { consumedInMl: { increment: input.amountConsumedInMl } },
       })
 

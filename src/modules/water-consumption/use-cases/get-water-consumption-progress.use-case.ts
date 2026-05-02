@@ -1,28 +1,35 @@
 import { Injectable } from '@nestjs/common'
+import { toPercentage } from 'src/common/helpers'
 import { getTodayInTimezone } from 'src/common/helpers/get-today-in-timezone.helper'
-import { toPercentage } from 'src/common/helpers/to-percentage.helper'
+import { parseDateToTime } from 'src/common/helpers/parse-date-to-time.helper'
 import { RequestContextService } from 'src/common/services/request-context.service'
-import { WaterConsumptionRepository } from '../repositories/water-consumption.repository'
+import { WaterConsumptionRepository } from 'src/modules/water-consumption/repositories/water-consumption.repository'
+import { GetWaterConsumptionProgressOutput } from 'src/modules/water-consumption/types'
 
 @Injectable()
 export class GetWaterConsumptionProgressUseCase {
   constructor(
-    private readonly waterConsumptionRepo: WaterConsumptionRepository,
+    private readonly waterConsumptionRepository: WaterConsumptionRepository,
     private readonly requestContext: RequestContextService,
   ) {}
 
-  async execute() {
+  async execute(): Promise<GetWaterConsumptionProgressOutput> {
     const userId = this.requestContext.getUserId
 
     const { timezone } = this.requestContext.getProfile
-    const todayInTimezone = getTodayInTimezone(timezone)
 
-    const todayConsumptionsInMl = await this.waterConsumptionRepo.history(userId, {
-      fromDate: todayInTimezone,
-      toDate: todayInTimezone,
+    const todayAtMidnight = getTodayInTimezone(timezone)
+    const todayAtEndOfDay = new Date(todayAtMidnight)
+
+    todayAtEndOfDay.setUTCHours(23, 59, 59, 999)
+
+    const todayConsumptionsHistory = await this.waterConsumptionRepository.findHistory({
+      userId,
+      fromDate: todayAtMidnight,
+      toDate: todayAtEndOfDay,
     })
 
-    const todayTotalConsumptionInMl = todayConsumptionsInMl.reduce(
+    const todayTotalConsumptionInMl = todayConsumptionsHistory.reduce(
       (total, current) => total + current.amountConsumedInMl,
       0,
     )
@@ -31,8 +38,13 @@ export class GetWaterConsumptionProgressUseCase {
 
     return {
       targetConsumptionInMl: dailyWaterConsumption.targetInMl,
-      totalConsumptionInMl: todayTotalConsumptionInMl,
-      progress: toPercentage(dailyWaterConsumption.targetInMl, todayTotalConsumptionInMl),
+      totalConsumedInMl: todayTotalConsumptionInMl,
+      consumptionProgress: toPercentage(dailyWaterConsumption.targetInMl, todayTotalConsumptionInMl),
+      consumptionsHistory: todayConsumptionsHistory.map((consumption) => ({
+        id: consumption.id,
+        amountConsumedInMl: consumption.amountConsumedInMl,
+        time: parseDateToTime(consumption.dateOfConsumption, timezone),
+      })),
     }
   }
 }
