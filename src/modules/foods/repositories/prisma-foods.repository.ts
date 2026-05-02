@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { Food } from 'generated/prisma/client'
-import { BaseRepository } from 'src/common/repositories/base.repository'
 import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
-import { GetAllFoodsByCategoryInput, GetAllFoodsInput } from '../types/get-all-foods.types'
-import { SaveFoodInput } from '../types/save-food.types'
+import { BaseRepository } from 'src/infra/database/repositories/base.repository'
+import { FindManyFoodsByCategoryInput } from 'src/modules/foods/types/find-many-foods-by-category.types'
+import { FindAllFoodsRepositoryInput } from '../types/find-all-foods.types'
+import { SaveFoodRepositoryInput } from '../types/save-food.types'
 import { FoodsRepository } from './foods.repository'
 
 @Injectable()
@@ -16,22 +17,22 @@ export class PrismaFoodsRepository extends BaseRepository implements FoodsReposi
     super(prisma, transactionContext)
   }
 
-  async getOne(foodId: string): Promise<Food | null> {
+  async findOne(foodId: string): Promise<Food | null> {
     return await this.db.food.findFirst({
       where: { id: foodId },
     })
   }
 
-  async getManyByIds(foodIds: string[]): Promise<Food[]> {
+  async findManyByIds(foodsIds: string[]): Promise<Food[]> {
     return await this.db.food.findMany({
-      where: { id: { in: foodIds } },
+      where: { id: { in: foodsIds } },
     })
   }
 
-  async save(userId: string, input: SaveFoodInput): Promise<Food> {
+  async save(input: SaveFoodRepositoryInput): Promise<Food> {
     return await this.db.food.create({
       data: {
-        userId,
+        userId: input.userId,
         name: input.name,
         normalizedBase: input.normalizedBase,
         category: input.category,
@@ -44,18 +45,23 @@ export class PrismaFoodsRepository extends BaseRepository implements FoodsReposi
     })
   }
 
-  async getAll(userId: string, input: GetAllFoodsInput): Promise<Food[]> {
+  async findAll(input: FindAllFoodsRepositoryInput): Promise<Food[]> {
     return await this.db.food.findMany({
-      where: { userId },
+      where: { userId: input.userId },
       orderBy: { name: 'asc' },
       take: input.limit,
       skip: input.offset,
     })
   }
 
-  async getAllByCategory(userId: string, input: GetAllFoodsByCategoryInput): Promise<Food[]> {
+  async findManyByCategory(input: FindManyFoodsByCategoryInput): Promise<Food[]> {
     return await this.db.food.findMany({
-      where: { AND: { userId, category: input.category } },
+      where: {
+        AND: {
+          userId: input.userId,
+          category: input.category,
+        },
+      },
       orderBy: { name: 'asc' },
       take: input.limit,
       skip: input.offset,

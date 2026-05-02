@@ -3,12 +3,12 @@ import { RequestContextService } from 'src/common/services/request-context.servi
 import { TransactionService } from 'src/common/services/transaction.service'
 import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
+import { FoodsController } from 'src/modules/foods/controllers/foods.controller'
+import { FoodsRepository } from 'src/modules/foods/repositories/foods.repository'
+import { PrismaFoodsRepository } from 'src/modules/foods/repositories/prisma-foods.repository'
+import { SaveFoodUseCase } from 'src/modules/foods/use-cases/save-food.use-case'
+import { SearchFoodsUseCase } from 'src/modules/foods/use-cases/search-foods.use-case'
 import { UsersModule } from '../users/users.module'
-import { FoodsController } from './controller/foods.controller'
-import { FoodsRepository } from './repositories/foods.repository'
-import { PrismaFoodsRepository } from './repositories/prisma-foods.repository'
-import { SaveFoodUseCase } from './use-cases/save-food.use-case'
-import { SearchFoodsUseCase } from './use-cases/search-foods.use-case'
 
 @Module({
   imports: [UsersModule],

@@ -1,30 +1,30 @@
 import { Injectable } from '@nestjs/common'
 import { NormalizedBase, PortionUnit } from 'generated/prisma/enums'
-import { FoodsRepository } from '../repositories/foods.repository'
-import { FoodNutritionalInfos } from '../types/food-nutritional-infos.type'
-import { SaveFoodRequest } from '../types/save-food.types'
+import { FoodsRepository } from 'src/modules/foods/repositories/foods.repository'
+import { FoodNutritionalInfos, SaveFoodInput, SaveFoodOutput } from 'src/modules/foods/types'
 
 @Injectable()
 export class SaveFoodUseCase {
-  constructor(private readonly foodsRepo: FoodsRepository) {}
+  constructor(private readonly foodsRepository: FoodsRepository) {}
 
-  async execute(request: SaveFoodRequest) {
+  async execute(input: SaveFoodInput): Promise<SaveFoodOutput> {
     const nutritionalInfos = {
-      caloriesInKcal: request.caloriesInKcal,
-      proteinsInGrams: request.proteinsInGrams,
-      carbsInGrams: request.carbsInGrams,
-      fatsInGrams: request.fatsInGrams,
+      caloriesInKcal: input.caloriesInKcal,
+      proteinsInGrams: input.proteinsInGrams,
+      carbsInGrams: input.carbsInGrams,
+      fatsInGrams: input.fatsInGrams,
     }
 
     const { normalizedBase, ...normalizedValues } = this.getNormalizedNutritionalInfos(
       nutritionalInfos,
-      request.portion.amount,
-      request.portion.unit,
+      input.portion.amount,
+      input.portion.unit,
     )
 
-    const savedFood = await this.foodsRepo.save(request.userId, {
-      name: request.name,
-      category: request.category,
+    const savedFood = await this.foodsRepository.save({
+      userId: input.userId,
+      name: input.name,
+      category: input.category,
       normalizedBase,
       ...nutritionalInfos,
       ...normalizedValues,
@@ -35,8 +35,8 @@ export class SaveFoodUseCase {
       name: savedFood.name,
       category: savedFood.category,
       description: savedFood.description,
-      amount: request.portion.amount,
-      unit: request.portion.unit,
+      amount: input.portion.amount,
+      unit: input.portion.unit,
       nutritionalInfos,
       normalizedNutritionalInfos: {
         caloriesInKcal: savedFood.normalizedCaloriesInKcal,

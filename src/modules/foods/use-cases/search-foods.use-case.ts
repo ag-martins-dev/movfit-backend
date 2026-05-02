@@ -1,21 +1,23 @@
 import { Injectable } from '@nestjs/common'
-import { FoodsRepository } from '../repositories/foods.repository'
-import { SearchFoodsRequest } from '../types/search-foods.types'
+import { FoodsRepository } from 'src/modules/foods/repositories/foods.repository'
+import { SearchFoodsInput, SearchFoodsOutput } from 'src/modules/foods/types'
 
 @Injectable()
 export class SearchFoodsUseCase {
-  constructor(private readonly foodsRepo: FoodsRepository) {}
+  constructor(private readonly foodsRepository: FoodsRepository) {}
 
-  async execute(request: SearchFoodsRequest) {
-    if (request.category) {
-      const foods = await this.foodsRepo.getAllByCategory(request.userId, {
-        limit: request.limit,
-        offset: request.offset,
-        category: request.category,
-        isRecipe: request.isRecipe,
+  async execute(input: SearchFoodsInput): Promise<SearchFoodsOutput> {
+    if (input.category) {
+      const foods = await this.foodsRepository.findManyByCategory({
+        userId: input.userId,
+        limit: input.limit,
+        offset: input.offset,
+        category: input.category,
+        isRecipe: input.isRecipe,
       })
+
       return {
-        quantity: foods.length,
+        foundedFoods: foods.length,
         foods: foods.map((food) => ({
           id: food.id,
           name: food.name,
@@ -29,13 +31,16 @@ export class SearchFoodsUseCase {
         })),
       }
     }
-    const foods = await this.foodsRepo.getAll(request.userId, {
-      limit: request.limit,
-      offset: request.offset,
-      isRecipe: request.isRecipe,
+
+    const foods = await this.foodsRepository.findAll({
+      userId: input.userId,
+      limit: input.limit,
+      offset: input.offset,
+      isRecipe: input.isRecipe,
     })
+
     return {
-      quantity: foods.length,
+      foundedFoods: foods.length,
       foods: foods.map((food) => ({
         id: food.id,
         name: food.name,
