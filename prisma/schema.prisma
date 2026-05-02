@@ -379,7 +379,7 @@ model DailyWaterConsumption {
 model WaterConsumption {
   id                 String   @id @default(uuid())
   amountConsumedInMl Int      @map("amount_consumed_in_ml")
-  dateOfConsumption  DateTime @map("date_of_consumption") @db.Date
+  dateOfConsumption  DateTime @map("date_of_consumption") @db.Timestamptz()
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz()
