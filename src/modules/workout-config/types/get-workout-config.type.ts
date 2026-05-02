@@ -5,4 +5,5 @@ export type GetWorkoutConfigOutput = {
   freeDaysPerWeek: number
   freeTimeByDayInSeconds: number
   focusMuscles: FocusMuscle[]
+  createdAt: Date
 }

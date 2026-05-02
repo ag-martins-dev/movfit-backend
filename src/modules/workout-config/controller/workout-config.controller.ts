@@ -5,10 +5,13 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard'
 import { OnboardingGuard } from 'src/common/guards/onboarding.guard'
 import type { AuthUser } from 'src/common/types/auth-user.types'
-import { GetWorkoutConfigResponseDTO } from '../dtos/get-workout-config-response.dto'
-import { RegisterWorkoutConfigRequestDTO, RegisterWorkoutConfigResponseDTO } from '../dtos/register-workout-config.dto'
-import { GetWorkoutConfigUseCase } from '../use-cases/get-workout-config.use-case'
-import { RegisterWorkoutConfigUseCase } from '../use-cases/register-workout-config.use-case'
+import {
+  GetWorkoutConfigResponseDTO,
+  RegisterWorkoutConfigRequestDTO,
+  RegisterWorkoutConfigResponseDTO,
+} from 'src/modules/workout-config/dtos'
+import { GetWorkoutConfigUseCase } from 'src/modules/workout-config/use-cases/get-workout-config.use-case'
+import { RegisterWorkoutConfigUseCase } from 'src/modules/workout-config/use-cases/register-workout-config.use-case'
 
 @UseGuards(JwtAuthGuard, OnboardingGuard)
 @Controller({ path: '/workout-config', version: '1' })
