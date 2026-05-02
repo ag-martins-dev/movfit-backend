@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger/dist'
 import { Type } from 'class-transformer'
 import {
   ArrayMinSize,
@@ -44,7 +45,21 @@ class MealDTO {
   foods: FoodDTO[]
 }
 
-export class CreateDietRequestBodyDTO {
+class MacrosDTO {
+  @ApiProperty({ type: 'integer' })
+  readonly caloriesInKcal: number
+
+  @ApiProperty({ type: 'integer' })
+  readonly proteinsInGrams: number
+
+  @ApiProperty({ type: 'integer' })
+  readonly carbsInGrams: number
+
+  @ApiProperty({ type: 'integer' })
+  readonly fatsInGrams: number
+}
+
+export class CreateDietRequestDTO {
   @IsString()
   @IsNotEmpty()
   name: string
@@ -57,4 +72,18 @@ export class CreateDietRequestBodyDTO {
   @ValidateNested({ each: true })
   @Type(() => MealDTO)
   meals: MealDTO[]
+}
+
+export class CreateDietResponseDTO {
+  @ApiProperty({ type: 'string', format: 'uuid' })
+  readonly id: string
+
+  @ApiProperty({ type: 'boolean', default: false })
+  readonly isActive: boolean
+
+  @ApiProperty({ enum: DietGoal })
+  readonly goal: DietGoal
+
+  @ApiProperty({ type: MacrosDTO })
+  readonly macros: MacrosDTO
 }
