@@ -1,0 +1,5 @@
+export const parseDateString = (dateString: string): Date => {
+  const [year, month, day] = dateString.split('-').map(Number)
+
+  return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0))
+}
