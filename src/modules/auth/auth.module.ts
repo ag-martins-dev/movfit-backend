@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
-import { UsersModule } from '../users/users.module'
-import { AuthController } from './controller/auth.controller'
-import { JwtStrategy } from './strategy/jwt.strategy'
-import { SigninUseCase } from './use-cases/signin.use-case'
-import { SignupUseCase } from './use-cases/signup.use-case'
+import { AuthController } from 'src/modules/auth/controllers/auth.controller'
+import { JwtStrategy } from 'src/modules/auth/strategies/jwt.strategy'
+import { SigninUseCase } from 'src/modules/auth/use-cases/signin.use-case'
+import { SignupUseCase } from 'src/modules/auth/use-cases/signup.use-case'
+import { UsersModule } from 'src/modules/users/users.module'
 
 @Module({
   imports: [

@@ -1,22 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsEmail, IsString, MinLength } from 'class-validator'
+import { IsEmail, IsString, IsStrongPassword } from 'class-validator'
 
-export class SignupRequestDto {
+export class SignupDTO {
   @ApiProperty({ type: 'string', required: true })
   @IsString()
   readonly name: string
 
-  @ApiProperty({ type: 'string', format: 'email', uniqueItems: true, required: true })
-  @IsEmail()
+  @ApiProperty({ type: 'string', format: 'email', required: true })
+  @IsEmail({
+    allow_underscores: true,
+    domain_specific_validation: true,
+  })
   readonly email: string
 
-  @ApiProperty({ type: 'string', format: 'password', minLength: 8, required: true })
-  @IsString()
-  @MinLength(8)
+  @ApiProperty({ type: 'string', format: 'password', required: true })
+  @IsStrongPassword({
+    minLength: 6,
+    minLowercase: 1,
+    minNumbers: 1,
+    minSymbols: 1,
+    minUppercase: 1,
+  })
   readonly password: string
-}
-
-export class SignupResponseDto {
-  @ApiProperty({ type: 'string', format: 'password' })
-  readonly accessToken: string
 }

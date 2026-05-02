@@ -1,18 +1,22 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { IsEmail, IsString, MinLength } from 'class-validator'
+import { IsEmail, IsStrongPassword } from 'class-validator'
+import { Match } from 'src/modules/auth/decorators/match.decorator'
 
-export class SigninRequestDto {
-  @ApiProperty({ type: 'string', format: 'email', uniqueItems: true, required: true })
-  @IsEmail()
+export class SigninDTO {
+  @IsEmail({
+    allow_underscores: true,
+    domain_specific_validation: true,
+  })
   readonly email: string
 
-  @ApiProperty({ type: 'string', format: 'password', minLength: 8, required: true })
-  @IsString()
-  @MinLength(8)
+  @IsStrongPassword({
+    minLength: 6,
+    minLowercase: 1,
+    minNumbers: 1,
+    minSymbols: 1,
+    minUppercase: 1,
+  })
   readonly password: string
-}
 
-export class SigninResponseDto {
-  @ApiProperty({ type: 'string', format: 'password' })
-  readonly accessToken: string
+  @Match('password')
+  readonly confirmPassword: string
 }
