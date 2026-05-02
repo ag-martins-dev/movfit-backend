@@ -1,6 +1,9 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "biomejs.biome",
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
+  "js/ts.preferences.importModuleSpecifierEnding": "minimal",
+  "js/ts.suggest.autoImports": true,
   "editor.codeActionsOnSave": {
     "source.organizeImports.biome": "always"
   },
