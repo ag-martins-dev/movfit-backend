@@ -6,8 +6,8 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard'
 import { OnboardingGuard } from 'src/common/guards/onboarding.guard'
 import { ProfileInterceptor } from 'src/common/interceptors/profile.interceptor'
 import { WorkoutConfigInterceptor } from 'src/common/interceptors/workout-config.interceptor'
-import { MeResponseDTO } from '../dtos/me.dto'
-import { MeUseCase } from '../use-cases/me.use-case'
+import { MeResponseDTO } from 'src/modules/users/dtos'
+import { MeUseCase } from 'src/modules/users/use-cases/me.use-case'
 
 @UseGuards(JwtAuthGuard, OnboardingGuard)
 @Controller({ path: '/users', version: '1' })

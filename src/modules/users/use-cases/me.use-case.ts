@@ -19,7 +19,7 @@ export class MeUseCase {
         id: profile.id,
         timezone: profile.timezone,
         biologicalSex: profile.biologicalSex,
-        birthDate: profile.birthDate,
+        birthDate: profile.birthDate.toLocaleDateString('pt-BR', { timeZone: profile.timezone }),
         goal: profile.goal,
         heightInCentimeters: profile.heightInCentimeters,
         targetWeightInGrams: profile.targetWeightInGrams,

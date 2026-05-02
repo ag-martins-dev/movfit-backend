@@ -8,7 +8,7 @@ export type MeOutput = {
     id: string
     goal: Goal
     biologicalSex: BiologicalSex
-    birthDate: Date
+    birthDate: string
     heightInCentimeters: number
     weightInGrams: number
     targetWeightInGrams: number
