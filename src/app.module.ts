@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler/dist'
+import { AuthModule } from 'src/modules/auth/auth.module'
+import { DailyNutritionModule } from 'src/modules/daily-nutrition/daily-nutrition.module'
+import { DailyWaterConsumptionModule } from 'src/modules/daily-water-consumption/daily-water-consumption.module'
+import { DietsModule } from 'src/modules/diets/diets.module'
+import { FoodsModule } from 'src/modules/foods/foods.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { AuthModule } from './modules/auth/auth.module'
-import { DailyNutritionModule } from './modules/daily-nutrition/daily-nutrition.module'
-import { DailyWaterConsumptionModule } from './modules/daily-water-consumption/daily-water-consumption.module'
-import { DietsModule } from './modules/diets/diets.module'
-import { FoodsModule } from './modules/foods/foods.module'
 import { ProfileModule } from './modules/profile/profile.module'
 import { UsersModule } from './modules/users/users.module'
 import { WaterConsumptionHistoryModule } from './modules/water-consumption/water-consumption.module'
@@ -43,7 +43,7 @@ import { WorkoutConfigModule } from './modules/workout-config/workout-config.mod
         blockDuration: 10000,
       },
     ]),
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
     AuthModule,
     DailyNutritionModule,
