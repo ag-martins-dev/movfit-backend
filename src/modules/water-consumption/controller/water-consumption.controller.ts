@@ -1,26 +1,32 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Query, UseGuards, UseInterceptors } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  ParseIntPipe,
+  Patch,
+  Query,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger/dist'
 import { Throttle } from '@nestjs/throttler/dist'
-import { CurrentUser } from 'src/common/decorators/current-user.decorator'
 import { RequireDailyWaterConsumption } from 'src/common/decorators/require-daily-water-consumption.decorator'
 import { RequireProfile } from 'src/common/decorators/require-profile.decorator'
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard'
 import { OnboardingGuard } from 'src/common/guards/onboarding.guard'
 import { DailyWaterConsumptionInterceptor } from 'src/common/interceptors/daily-water-consumption.interceptor'
 import { ProfileInterceptor } from 'src/common/interceptors/profile.interceptor'
-import type { AuthUser } from 'src/common/types/auth-user.types'
 import {
   GetWaterConsumptionHistoryQueryDTO,
   GetWaterConsumptionHistoryResponseDTO,
-} from '../dtos/get-water-consumption-history.dto'
-import { GetWaterConsumptionProgressResponseDTO } from '../dtos/get-water-consumption-progress.dto'
-import {
-  RegisterWaterConsumptionRequestDTO,
+  GetWaterConsumptionProgressResponseDTO,
   RegisterWaterConsumptionResponseDTO,
-} from '../dtos/register-water-consumption.dto'
-import { GetWaterConsumptionHistoryUseCase } from '../use-cases/get-water-consumption-history.use-case'
-import { GetWaterConsumptionProgressUseCase } from '../use-cases/get-water-consumption-progress.use-case'
-import { RegisterWaterConsumptionUseCase } from '../use-cases/register-water-consumption.use-case'
+} from 'src/modules/water-consumption/dtos'
+import { GetWaterConsumptionHistoryUseCase } from 'src/modules/water-consumption/use-cases/get-water-consumption-history.use-case'
+import { GetWaterConsumptionProgressUseCase } from 'src/modules/water-consumption/use-cases/get-water-consumption-progress.use-case'
+import { RegisterWaterConsumptionUseCase } from 'src/modules/water-consumption/use-cases/register-water-consumption.use-case'
 
 @UseGuards(JwtAuthGuard, OnboardingGuard)
 @Controller({ path: '/water-consumption', version: '1' })
@@ -31,10 +37,12 @@ export class WaterConsumptionController {
     private readonly registerWaterConsumptionUseCase: RegisterWaterConsumptionUseCase,
   ) {}
 
-  @ApiOkResponse({ type: [GetWaterConsumptionHistoryResponseDTO], isArray: true })
+  @RequireProfile()
+  @UseInterceptors(ProfileInterceptor)
+  @ApiOkResponse({ type: GetWaterConsumptionHistoryResponseDTO, schema: { nullable: true } })
   @Get('/history')
-  getWaterConsumptionHistory(@CurrentUser() user: AuthUser, @Query() query: GetWaterConsumptionHistoryQueryDTO) {
-    return this.getWaterConsumptionHistoryUseCase.execute(user.id, query)
+  getWaterConsumptionHistory(@Query() query: GetWaterConsumptionHistoryQueryDTO) {
+    return this.getWaterConsumptionHistoryUseCase.execute(query)
   }
 
   @RequireProfile()
@@ -53,7 +61,7 @@ export class WaterConsumptionController {
   @ApiCreatedResponse({ type: RegisterWaterConsumptionResponseDTO })
   @HttpCode(HttpStatus.CREATED)
   @Patch()
-  registerWaterConsumption(@Body() dto: RegisterWaterConsumptionRequestDTO) {
-    return this.registerWaterConsumptionUseCase.execute(dto)
+  registerWaterConsumption(@Body('amountConsumedInMl', ParseIntPipe) amountConsumedInMl: number) {
+    return this.registerWaterConsumptionUseCase.execute(amountConsumedInMl)
   }
 }

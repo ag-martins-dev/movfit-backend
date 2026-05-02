@@ -1,20 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger/dist'
-import { Type } from 'class-transformer'
-import { IsInt } from 'class-validator'
-
-export class RegisterWaterConsumptionRequestDTO {
-  @IsInt()
-  @Type(() => Number)
-  readonly amountConsumedInMl: number
-}
+import { ApiProperty } from '@nestjs/swagger'
 
 export class RegisterWaterConsumptionResponseDTO {
-  @ApiProperty({ type: 'string', format: 'uuid' })
+  @ApiProperty({ title: 'ID', type: 'string', format: 'uuid' })
   readonly id: string
 
-  @ApiProperty({ type: 'integer' })
+  @ApiProperty({ title: 'Amount consumed (ml)', type: 'integer', minimum: 1 })
   readonly amountConsumedInMl: number
 
-  @ApiProperty({ type: Date })
-  readonly dateOfConsumption: Date
+  @ApiProperty({ title: 'Consumption date', type: 'string', format: 'date', example: '01/05/2026' })
+  readonly consumptionDate: string
+
+  @ApiProperty({ title: 'Consumption time', type: 'string', format: 'time', example: '23:59:59' })
+  readonly consumptionTime: string
 }
