@@ -1,16 +1,15 @@
-export function getTodayInTimezone(timezone: string): Date {
+export const getTodayInTimezone = (timezone: string): Date => {
   const now = new Date()
 
-  const parts = new Intl.DateTimeFormat('en-US', {
+  const formatter = new Intl.DateTimeFormat('pt-BR', {
     timeZone: timezone,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).formatToParts(now)
+  })
 
-  const year = Number(parts.find((p) => p.type === 'year')?.value)
-  const month = Number(parts.find((p) => p.type === 'month')?.value) - 1
-  const day = Number(parts.find((p) => p.type === 'day')?.value)
+  const formattedDate = formatter.format(now)
+  const [year, month, day] = formattedDate.split('/').map(Number)
 
-  return new Date(year, month, day)
+  return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0))
 }

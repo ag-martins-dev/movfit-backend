@@ -1,4 +1,4 @@
-export function calculateAge(birthDate: Date) {
+export const calculateAge = (birthDate: Date) => {
   const today = new Date()
 
   today.setUTCHours(0, 0, 0, 0)
