@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 
 export class GetDailyWaterConsumptionResponseDTO {
-  @ApiProperty({ type: 'integer', minimum: 0 })
+  @ApiProperty({ title: 'Consumption target (ml)', type: 'integer', minimum: 1 })
   readonly consumptionTargetInMl: number
 }

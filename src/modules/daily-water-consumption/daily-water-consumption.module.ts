@@ -3,13 +3,13 @@ import { RequestContextService } from 'src/common/services/request-context.servi
 import { TransactionService } from 'src/common/services/transaction.service'
 import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
-import { ProfileModule } from '../profile/profile.module'
-import { UsersModule } from '../users/users.module'
-import { WorkoutConfigModule } from '../workout-config/workout-config.module'
-import { DailyWaterConsumptionController } from './controller/daily-water-consumption.controller'
-import { DailyWaterConsumptionRepository } from './repositories/daily-water-consumption.repository'
-import { PrismaDailyWaterConsumptionRepository } from './repositories/prisma-daily-water-consumption.repository'
-import { GetDailyWaterConsumptionUseCase } from './use-cases/get-daily-water-consumption.use-case'
+import { DailyWaterConsumptionController } from 'src/modules/daily-water-consumption/controllers/daily-water-consumption.controller'
+import { DailyWaterConsumptionRepository } from 'src/modules/daily-water-consumption/repositories/daily-water-consumption.repository'
+import { PrismaDailyWaterConsumptionRepository } from 'src/modules/daily-water-consumption/repositories/prisma-daily-water-consumption.repository'
+import { GetDailyWaterConsumptionUseCase } from 'src/modules/daily-water-consumption/use-cases/get-daily-water-consumption.use-case'
+import { ProfileModule } from 'src/modules/profile/profile.module'
+import { UsersModule } from 'src/modules/users/users.module'
+import { WorkoutConfigModule } from 'src/modules/workout-config/workout-config.module'
 
 @Module({
   imports: [UsersModule, ProfileModule, WorkoutConfigModule],
