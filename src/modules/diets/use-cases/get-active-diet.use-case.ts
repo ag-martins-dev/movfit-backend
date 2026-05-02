@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common'
-import { DietsRepository } from '../repositories/diets.repository'
+import { DietsRepository } from 'src/modules/diets/repositories/diets.repository'
+import { GetDietsOutput } from 'src/modules/diets/types'
 
 @Injectable()
 export class GetActiveDietUseCase {
-  constructor(private readonly dietsRepo: DietsRepository) {}
+  constructor(private readonly dietsRepository: DietsRepository) {}
 
-  async execute(userId: string) {
-    const activeDiet = await this.dietsRepo.getActive(userId)
+  async execute(userId: string): Promise<GetDietsOutput | null> {
+    const activeDiet = await this.dietsRepository.findActive(userId)
 
     if (!activeDiet) return null
 
@@ -19,7 +20,7 @@ export class GetActiveDietUseCase {
         caloriesInKcal: activeDiet.totalCaloriesInKcal,
         proteinsInGrams: activeDiet.totalProteinsInGrams,
         carbsInGrams: activeDiet.totalCarbsInGrams,
-        fats: activeDiet.totalFatsInGrams,
+        fatsInGrams: activeDiet.totalFatsInGrams,
       },
     }
   }

@@ -3,23 +3,23 @@ import { Food } from 'generated/prisma/client'
 import { PortionUnit } from 'generated/prisma/enums'
 import { RequestContextService } from 'src/common/services/request-context.service'
 import { TransactionService } from 'src/common/services/transaction.service'
+import { DietsRepository } from 'src/modules/diets/repositories/diets.repository'
+import { CreateDietInput, CreateDietOutput } from 'src/modules/diets/types'
 import { FoodsRepository } from 'src/modules/foods/repositories/foods.repository'
 import { MealsRepository } from 'src/modules/meals/repositories/meals.repository'
-import { DietsRepository } from '../repositories/diets.repository'
-import { CreateDietUseCaseInput } from '../types/create-diet.types'
 
 @Injectable()
 export class CreateDietUseCase {
   constructor(
-    private readonly dietsRepo: DietsRepository,
-    private readonly mealsRepo: MealsRepository,
-    private readonly foodsRepo: FoodsRepository,
+    private readonly dietsRepository: DietsRepository,
+    private readonly mealsRepository: MealsRepository,
+    private readonly foodsRepository: FoodsRepository,
     private readonly requestContext: RequestContextService,
     private readonly transaction: TransactionService,
   ) {}
 
-  async execute(request: CreateDietUseCaseInput) {
-    const { name: dietName, goal: dietGoal, meals: dietMeals } = request
+  async execute(input: CreateDietInput): Promise<CreateDietOutput> {
+    const { name: dietName, goal: dietGoal, meals: dietMeals } = input
 
     const userId = this.requestContext.getUserId
 
@@ -29,20 +29,17 @@ export class CreateDietUseCase {
       throw new BadRequestException('Duplicate meal time')
     }
 
-    // TODO: In the future, to remove this, add an "order" property to Meal inside schema, to control order of each diet meal
-    const meals = dietMeals.sort((a, b) => a.timeInMinutes - b.timeInMinutes)
+    const sortedMeals = dietMeals.sort((a, b) => a.timeInMinutes - b.timeInMinutes)
 
-    const foodsIds = new Set(meals.flatMap((meal) => meal.foods.map((food) => food.foodId)))
-    const foods = await this.foodsRepo.getManyByIds([...foodsIds.keys()])
+    const foodsIds = new Set(sortedMeals.flatMap((meal) => meal.foods.map((food) => food.foodId)))
+    const foods = await this.foodsRepository.findManyByIds([...foodsIds.keys()])
     const foodsMap = new Map(foods.map((food) => [food.id, food]))
 
-    const computedMeals = meals.map((dietMeal) => {
+    const computedMeals = sortedMeals.map((dietMeal) => {
       const mealFoods = dietMeal.foods.map((dietMealFood) => {
         const food = foodsMap.get(dietMealFood.foodId)
 
-        if (!food) {
-          throw new NotFoundException(`Food ${dietMealFood.foodId} not found`)
-        }
+        if (!food) throw new NotFoundException(`Food with ID: ${dietMealFood.foodId} not found`)
 
         const foodMacros = this.calculateMealMacros(food, dietMealFood.amount, dietMealFood.unit)
 
@@ -88,13 +85,12 @@ export class CreateDietUseCase {
     )
 
     return await this.transaction.run(async () => {
-      const activeDiet = await this.dietsRepo.getActive(userId)
+      const activeDiet = await this.dietsRepository.findActive(userId)
 
-      if (activeDiet) {
-        await this.dietsRepo.deactive(activeDiet.id, userId)
-      }
+      if (activeDiet) await this.dietsRepository.deactivate(activeDiet.id, userId)
 
-      const createdDiet = await this.dietsRepo.create(userId, {
+      const createdDiet = await this.dietsRepository.create({
+        userId,
         goal: dietGoal,
         name: dietName,
         totalCaloriesInKcal: dietTotalMacros.caloriesInKcal,
@@ -103,9 +99,9 @@ export class CreateDietUseCase {
         totalProteinsInGrams: dietTotalMacros.proteinsInGrams,
       })
 
-      // TODO: trocar por mealsRepo.createMany
+      // TODO: Swith to "mealsRepo.createMany" method.
       for (const meal of computedMeals) {
-        await this.mealsRepo.create({
+        await this.mealsRepository.create({
           dietId: createdDiet.id,
           name: meal.name,
           foods: meal.foods,
@@ -117,7 +113,16 @@ export class CreateDietUseCase {
         })
       }
 
-      return createdDiet
+      return {
+        id: createdDiet.id,
+        goal: createdDiet.goal,
+        macros: {
+          caloriesInKcal: createdDiet.totalCaloriesInKcal,
+          proteinsInGrams: createdDiet.totalProteinsInGrams,
+          carbsInGrams: createdDiet.totalCarbsInGrams,
+          fatsInGrams: createdDiet.totalFatsInGrams,
+        },
+      }
     })
   }
 

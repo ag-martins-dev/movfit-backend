@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { Diet } from 'generated/prisma/client'
-import { BaseRepository } from 'src/common/repositories/base.repository'
 import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
+import { BaseRepository } from 'src/infra/database/repositories/base.repository'
 import { CreateDietRepositoryInput } from '../types/create-diet.types'
 import { DietsRepository } from './diets.repository'
 
@@ -15,10 +15,10 @@ export class PrismaDietsRepository extends BaseRepository implements DietsReposi
     super(prisma, transactionContext)
   }
 
-  async create(userId: string, input: CreateDietRepositoryInput): Promise<Diet> {
+  async create(input: CreateDietRepositoryInput): Promise<Diet> {
     return await this.db.diet.create({
       data: {
-        userId,
+        userId: input.userId,
         totalCaloriesInKcal: input.totalCaloriesInKcal,
         totalProteinsInGrams: input.totalProteinsInGrams,
         totalCarbsInGrams: input.totalCarbsInGrams,
@@ -29,34 +29,34 @@ export class PrismaDietsRepository extends BaseRepository implements DietsReposi
     })
   }
 
-  async getOne(dietId: string, userId: string): Promise<Diet | null> {
+  async findOne(dietId: string, userId: string): Promise<Diet | null> {
     return await this.db.diet.findFirst({
       where: { id: dietId, userId },
     })
   }
 
-  async getAll(userId: string): Promise<Diet[]> {
+  async findAll(userId: string): Promise<Diet[]> {
     return await this.db.diet.findMany({
       where: { userId },
       orderBy: [{ createdAt: 'desc' }],
     })
   }
 
-  async getActive(userId: string): Promise<Diet | null> {
+  async findActive(userId: string): Promise<Diet | null> {
     return await this.db.diet.findFirst({
       where: { userId, isActive: { equals: true } },
     })
   }
 
-  async deactive(dietId: string, userId: string): Promise<void> {
-    await this.db.diet.update({
+  async deactivate(dietId: string, userId: string): Promise<Diet> {
+    return await this.db.diet.update({
       where: { id: dietId, userId, isActive: { equals: true } },
       data: { isActive: false },
     })
   }
 
-  async delete(dietId: string, userId: string): Promise<void> {
-    await this.db.diet.delete({
+  async delete(dietId: string, userId: string): Promise<Diet> {
+    return await this.db.diet.delete({
       where: { id: dietId, userId },
     })
   }
