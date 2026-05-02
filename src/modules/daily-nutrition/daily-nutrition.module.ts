@@ -3,15 +3,15 @@ import { RequestContextService } from 'src/common/services/request-context.servi
 import { TransactionService } from 'src/common/services/transaction.service'
 import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
-import { DailyWaterConsumptionModule } from '../daily-water-consumption/daily-water-consumption.module'
-import { DietsModule } from '../diets/diets.module'
-import { ProfileModule } from '../profile/profile.module'
-import { UsersModule } from '../users/users.module'
-import { DailyNutritionController } from './controller/daily-nutrition.controller'
-import { DailyNutritionRepository } from './repositories/daily-nutrition.repository'
-import { PrismaDailyNutritionRepository } from './repositories/prisma-daily-nutrition.repository'
-import { GetTodayNutritionProgressUseCase } from './use-cases/get-today-nutrition-progress.use-case'
-import { UpdateTodayNutritionProgressUseCase } from './use-cases/update-today-nutrition-progress.use-case'
+import { DailyNutritionController } from 'src/modules/daily-nutrition/controllers/daily-nutrition.controller'
+import { DailyNutritionRepository } from 'src/modules/daily-nutrition/repositories/daily-nutrition.repository'
+import { PrismaDailyNutritionRepository } from 'src/modules/daily-nutrition/repositories/prisma-daily-nutrition.repository'
+import { GetNutritionProgressUseCase } from 'src/modules/daily-nutrition/use-cases/get-nutrition-progress.use-case'
+import { UpdateNutritionProgressUseCase } from 'src/modules/daily-nutrition/use-cases/update-nutrition-progress.use-case'
+import { DailyWaterConsumptionModule } from 'src/modules/daily-water-consumption/daily-water-consumption.module'
+import { DietsModule } from 'src/modules/diets/diets.module'
+import { ProfileModule } from 'src/modules/profile/profile.module'
+import { UsersModule } from 'src/modules/users/users.module'
 
 @Module({
   imports: [DailyWaterConsumptionModule, UsersModule, ProfileModule, DietsModule],
@@ -22,8 +22,8 @@ import { UpdateTodayNutritionProgressUseCase } from './use-cases/update-today-nu
     TransactionService,
     TransactionContextService,
     RequestContextService,
-    GetTodayNutritionProgressUseCase,
-    UpdateTodayNutritionProgressUseCase,
+    GetNutritionProgressUseCase,
+    UpdateNutritionProgressUseCase,
     {
       provide: DailyNutritionRepository,
       useClass: PrismaDailyNutritionRepository,

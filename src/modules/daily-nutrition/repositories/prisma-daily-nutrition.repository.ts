@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { DailyNutrition } from 'generated/prisma/client'
-import { getTodayInTimezone } from 'src/common/helpers/get-today-in-timezone.helper'
-import { BaseRepository } from 'src/common/repositories/base.repository'
+import { formatDateToISO } from 'src/common/helpers/format-date-to-iso.helper'
 import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
-import { GetTodayNutritionInput } from '../types/get-today-nutrition.type'
-import { UpsertTodayNutritionInput } from '../types/upsert-today-nutrition.type'
+import { BaseRepository } from 'src/infra/database/repositories/base.repository'
+import { GetNutritionInput, UpsertNutritionProgressInput } from '../types'
 import { DailyNutritionRepository } from './daily-nutrition.repository'
 
 @Injectable()
@@ -21,17 +20,17 @@ export class PrismaDailyNutritionRepository extends BaseRepository implements Da
     return value !== undefined ? { increment: value } : undefined
   }
 
-  async upsert(input: UpsertTodayNutritionInput): Promise<DailyNutrition> {
+  async upsert(input: UpsertNutritionProgressInput): Promise<DailyNutrition> {
     return await this.db.dailyNutrition.upsert({
       where: {
         userId_day: {
           userId: input.userId,
-          day: getTodayInTimezone(input.timezone),
+          day: formatDateToISO(new Date(), input.timezone),
         },
       },
       create: {
         userId: input.userId,
-        day: getTodayInTimezone(input.timezone),
+        day: formatDateToISO(new Date(), input.timezone),
         carbsInGrams: input.carbsInGrams,
         fatsInGrams: input.fatsInGrams,
         proteinsInGrams: input.proteinsInGrams,
@@ -44,11 +43,11 @@ export class PrismaDailyNutritionRepository extends BaseRepository implements Da
     })
   }
 
-  async get(input: GetTodayNutritionInput): Promise<DailyNutrition | null> {
+  async findOne(input: GetNutritionInput): Promise<DailyNutrition | null> {
     return await this.db.dailyNutrition.findFirst({
       where: {
         userId: input.userId,
-        day: getTodayInTimezone(input.timezone),
+        day: formatDateToISO(new Date(), input.timezone),
       },
     })
   }
