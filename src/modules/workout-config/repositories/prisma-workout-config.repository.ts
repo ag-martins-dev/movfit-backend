@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { WorkoutConfig } from 'generated/prisma/client'
-import { BaseRepository } from 'src/common/repositories/base.repository'
 import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
-import { RegisterWorkoutConfigInput } from '../types/register-workout-config.type'
-import { WorkoutConfigRepository } from './workout-config.repository'
+import { BaseRepository } from 'src/infra/database/repositories/base.repository'
+import { WorkoutConfigRepository } from 'src/modules/workout-config/repositories/workout-config.repository'
+import { RegisterWorkoutConfigRepositoryInput } from 'src/modules/workout-config/types'
 
 @Injectable()
 export class PrismaWorkoutConfigRepository extends BaseRepository implements WorkoutConfigRepository {
@@ -15,16 +15,16 @@ export class PrismaWorkoutConfigRepository extends BaseRepository implements Wor
     super(prisma, transactionContext)
   }
 
-  async get(userId: string): Promise<WorkoutConfig | null> {
+  async findOne(userId: string): Promise<WorkoutConfig | null> {
     return await this.db.workoutConfig.findFirst({
       where: { userId },
     })
   }
 
-  async register(userId: string, input: RegisterWorkoutConfigInput): Promise<WorkoutConfig> {
+  async create(input: RegisterWorkoutConfigRepositoryInput): Promise<WorkoutConfig> {
     return await this.db.workoutConfig.create({
       data: {
-        userId,
+        userId: input.userId,
         freeDaysPerWeek: input.freeDaysPerWeek,
         freeTimeByDayInSeconds: input.freeTimeByDayInSeconds,
         focusMuscles: input.focusMuscles,

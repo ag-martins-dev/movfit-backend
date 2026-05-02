@@ -4,10 +4,11 @@ import { GetWorkoutConfigOutput } from '../types/get-workout-config.type'
 
 @Injectable()
 export class GetWorkoutConfigUseCase {
-  constructor(private readonly workoutConfigRepo: WorkoutConfigRepository) {}
+  constructor(private readonly workoutConfigRepository: WorkoutConfigRepository) {}
 
   async execute(userId: string): Promise<GetWorkoutConfigOutput | null> {
-    const workoutConfig = await this.workoutConfigRepo.get(userId)
+    const workoutConfig = await this.workoutConfigRepository.findOne(userId)
+
     if (!workoutConfig) return null
 
     return {
@@ -15,6 +16,7 @@ export class GetWorkoutConfigUseCase {
       focusMuscles: workoutConfig.focusMuscles,
       freeDaysPerWeek: workoutConfig.freeDaysPerWeek,
       freeTimeByDayInSeconds: workoutConfig.freeTimeByDayInSeconds,
+      createdAt: workoutConfig.createdAt,
     }
   }
 }

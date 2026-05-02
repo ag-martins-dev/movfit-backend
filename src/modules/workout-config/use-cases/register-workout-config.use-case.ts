@@ -13,10 +13,19 @@ export class RegisterWorkoutConfigUseCase {
   async execute(input: RegisterWorkoutConfigInput): Promise<RegisterWorkoutConfigOutput> {
     const userId = this.requestContext.getUserId
 
-    return this.workoutConfigRepository.register(userId, {
+    const workoutConfig = await this.workoutConfigRepository.create({
+      userId,
       freeDaysPerWeek: input.freeDaysPerWeek,
       freeTimeByDayInSeconds: input.freeTimeByDayInSeconds,
       focusMuscles: input.focusMuscles,
     })
+
+    return {
+      id: workoutConfig.id,
+      focusMuscles: workoutConfig.focusMuscles,
+      freeDaysPerWeek: workoutConfig.freeDaysPerWeek,
+      freeTimeByDayInSeconds: workoutConfig.freeTimeByDayInSeconds,
+      createdAt: workoutConfig.createdAt,
+    }
   }
 }
