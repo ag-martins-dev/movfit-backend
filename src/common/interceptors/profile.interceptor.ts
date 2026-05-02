@@ -7,14 +7,14 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { constants } from 'src/common/constants'
+import { RequestContextService } from 'src/common/services/request-context.service'
 import { ProfileRepository } from 'src/modules/profile/repositories/profile.repository'
-import { RequestContextService } from '../services/request-context.service'
 
 @Injectable()
 export class ProfileInterceptor implements NestInterceptor {
   constructor(
     private readonly reflector: Reflector,
-    private readonly profileRepo: ProfileRepository,
+    private readonly profileRepository: ProfileRepository,
     private readonly requestContext: RequestContextService,
   ) {}
 
@@ -25,7 +25,7 @@ export class ProfileInterceptor implements NestInterceptor {
       const request = context.switchToHttp().getRequest()
       const user = request.user
 
-      const profile = await this.profileRepo.getProfile(user.id)
+      const profile = await this.profileRepository.findOne(user.id)
 
       if (!profile) throw new InternalServerErrorException('Interception error: Profile not found.')
 

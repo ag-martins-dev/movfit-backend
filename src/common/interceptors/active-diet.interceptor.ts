@@ -7,14 +7,14 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { constants } from 'src/common/constants'
+import { RequestContextService } from 'src/common/services/request-context.service'
 import { DietsRepository } from 'src/modules/diets/repositories/diets.repository'
-import { RequestContextService } from '../services/request-context.service'
 
 @Injectable()
 export class ActiveDietInterceptor implements NestInterceptor {
   constructor(
     private readonly reflector: Reflector,
-    private readonly dietsRepo: DietsRepository,
+    private readonly dietsRepository: DietsRepository,
     private readonly requestContext: RequestContextService,
   ) {}
 
@@ -25,7 +25,7 @@ export class ActiveDietInterceptor implements NestInterceptor {
       const request = context.switchToHttp().getRequest()
       const user = request.user
 
-      const activeDiet = await this.dietsRepo.getActive(user.id)
+      const activeDiet = await this.dietsRepository.findActive(user.id)
 
       if (!activeDiet) throw new InternalServerErrorException('Interception error: ActiveDiet not found.')
 

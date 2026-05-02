@@ -7,14 +7,14 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { constants } from 'src/common/constants'
+import { RequestContextService } from 'src/common/services/request-context.service'
 import { DailyWaterConsumptionRepository } from 'src/modules/daily-water-consumption/repositories/daily-water-consumption.repository'
-import { RequestContextService } from '../services/request-context.service'
 
 @Injectable()
 export class DailyWaterConsumptionInterceptor implements NestInterceptor {
   constructor(
     private readonly reflector: Reflector,
-    private readonly dailyWaterConsumptionRepo: DailyWaterConsumptionRepository,
+    private readonly dailyWaterConsumptionRepository: DailyWaterConsumptionRepository,
     private readonly requestContext: RequestContextService,
   ) {}
 
@@ -28,7 +28,7 @@ export class DailyWaterConsumptionInterceptor implements NestInterceptor {
       const request = context.switchToHttp().getRequest()
       const user = request.user
 
-      const dailyWaterConsumption = await this.dailyWaterConsumptionRepo.get(user.id)
+      const dailyWaterConsumption = await this.dailyWaterConsumptionRepository.findOne(user.id)
 
       if (!dailyWaterConsumption)
         throw new InternalServerErrorException('Interception error: DailyWaterConsumption not found.')

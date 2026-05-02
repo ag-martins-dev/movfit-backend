@@ -7,14 +7,14 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { constants } from 'src/common/constants'
+import { RequestContextService } from 'src/common/services/request-context.service'
 import { WorkoutConfigRepository } from 'src/modules/workout-config/repositories/workout-config.repository'
-import { RequestContextService } from '../services/request-context.service'
 
 @Injectable()
 export class WorkoutConfigInterceptor implements NestInterceptor {
   constructor(
     private readonly reflector: Reflector,
-    private readonly workoutConfigRepo: WorkoutConfigRepository,
+    private readonly workoutConfigRepository: WorkoutConfigRepository,
     private readonly requestContext: RequestContextService,
   ) {}
 
@@ -25,7 +25,7 @@ export class WorkoutConfigInterceptor implements NestInterceptor {
       const request = context.switchToHttp().getRequest()
       const user = request.user
 
-      const workoutConfig = await this.workoutConfigRepo.get(user.id)
+      const workoutConfig = await this.workoutConfigRepository.findOne(user.id)
 
       if (!workoutConfig) throw new InternalServerErrorException('Interception error: WorkoutConfig not found.')
 
