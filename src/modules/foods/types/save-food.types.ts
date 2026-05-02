@@ -1,6 +1,7 @@
 import { NormalizedBase, PortionUnit } from 'generated/prisma/enums'
+import { FoodNutritionalInfos } from 'src/modules/foods/types/food-nutritional-infos.types'
 
-export type SaveFoodRequest = {
+export type SaveFoodInput = {
   userId: string
   name: string
   category: string
@@ -14,7 +15,19 @@ export type SaveFoodRequest = {
   fatsInGrams: number
 }
 
-export type SaveFoodInput = {
+export type SaveFoodOutput = {
+  id: string
+  name: string
+  category: string
+  description: string | null
+  amount: number
+  unit: PortionUnit
+  nutritionalInfos: FoodNutritionalInfos
+  normalizedNutritionalInfos: FoodNutritionalInfos
+}
+
+export type SaveFoodRepositoryInput = {
+  userId: string
   name: string
   category: string
   normalizedBase: NormalizedBase
