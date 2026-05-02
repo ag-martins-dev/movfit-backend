@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { DailyWaterConsumption } from 'generated/prisma/client'
-import { BaseRepository } from 'src/common/repositories/base.repository'
 import { TransactionContextService } from 'src/common/services/transaction-context.service'
 import { PrismaService } from 'src/infra/database/prisma/prisma.service'
-import { UpsertDailyWaterConsumptionInput } from '../types/upsert-consumption.type'
+import { BaseRepository } from 'src/infra/database/repositories/base.repository'
+import { UpsertDailyWaterConsumptionInput } from '../types/upsert-daily-water-consumption.types'
 import { DailyWaterConsumptionRepository } from './daily-water-consumption.repository'
 
 @Injectable()
@@ -15,7 +15,7 @@ export class PrismaDailyWaterConsumptionRepository extends BaseRepository implem
     super(prisma, transactionContext)
   }
 
-  async get(userId: string): Promise<DailyWaterConsumption | null> {
+  async findOne(userId: string): Promise<DailyWaterConsumption | null> {
     return await this.db.dailyWaterConsumption.findFirst({
       where: { userId: userId },
     })

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Goal } from 'generated/prisma/enums'
 import { RequestContextService } from 'src/common/services/request-context.service'
-import { DailyWaterConsumptionRepository } from '../repositories/daily-water-consumption.repository'
+import { DailyWaterConsumptionRepository } from 'src/modules/daily-water-consumption/repositories/daily-water-consumption.repository'
 
 @Injectable()
 export class GetDailyWaterConsumptionUseCase {
@@ -14,7 +14,7 @@ export class GetDailyWaterConsumptionUseCase {
 
   constructor(
     private readonly requestContext: RequestContextService,
-    private readonly dailyWaterConsumptionRepo: DailyWaterConsumptionRepository,
+    private readonly dailyWaterConsumptionRepository: DailyWaterConsumptionRepository,
   ) {}
 
   async execute() {
@@ -31,7 +31,7 @@ export class GetDailyWaterConsumptionUseCase {
       weightInKg * this.goalFactors[goal] * biologicalSexFactor * ageFactor * activityFactor,
     )
 
-    const dailyWaterConsumption = await this.dailyWaterConsumptionRepo.upsert(userId, {
+    const dailyWaterConsumption = await this.dailyWaterConsumptionRepository.upsert(userId, {
       consumptionTargetInMl,
       totalConsumedInMl: 0,
     })
